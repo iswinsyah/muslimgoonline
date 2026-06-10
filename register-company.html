@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrasi Perusahaan - MCS Master</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-2xl bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-black text-orange-500 tracking-tighter italic">REGISTRASI PERUSAHAAN</h1>
+            <p class="text-sm text-slate-500 mt-1">Daftarkan perusahaan Anda untuk mendapatkan akses penuh ke platform MCS Master.</p>
+        </div>
+        <form id="company-reg-form" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nama Pemilik</label>
+                    <input type="text" name="nama_user" required class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nama Perusahaan</label>
+                    <input type="text" name="nama_perusahaan" required class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+            </div>
+            <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Alamat Perusahaan</label>
+                <textarea name="alamat_perusahaan" rows="2" required class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+            </div>
+             <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nomer Kontak Perusahaan (WhatsApp)</label>
+                <input type="tel" name="kontak_perusahaan" required class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500">
+            </div>
+            <hr class="my-6 border-slate-200">
+            <h3 class="text-center font-bold text-slate-600">Buat Akun Owner</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Username</label>
+                    <input type="text" name="username" required class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Password</label>
+                    <input type="password" name="password" required class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+            </div>
+            <hr class="my-6 border-slate-200">
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg">
+                <h4 class="font-bold text-amber-800">Instruksi Pembayaran</h4>
+                <p class="text-xs text-amber-700 mt-1">Silakan lakukan pembayaran biaya sewa tahunan sebesar **Rp 1.200.000,-** ke rekening berikut: <br><b>BCA 1234567890 a/n PT. MGO PUSAT</b></p>
+            </div>
+             <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Upload Bukti Transfer</label>
+                <input type="file" name="bukti_pembayaran" required accept="image/jpeg, image/png, image/gif" class="w-full mt-1 text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100">
+            </div>
+
+            <div class="pt-4">
+                <button type="submit" id="btn-register-company" class="w-full py-4 bg-orange-600 text-white rounded-xl font-black text-sm uppercase tracking-widest shadow-lg hover:bg-orange-700 transition-all active:scale-95">
+                    Kirim & Tunggu Validasi
+                </button>
+            </div>
+        </form>
+        <div class="text-center mt-6">
+            <a href="login.html" class="text-xs text-slate-500 hover:text-teal-600 font-bold">Kembali ke Halaman Login</a>
+        </div>
+    </div>
+    <script>
+        lucide.createIcons();
+        // Simple JS for form submission can be added here later
+    </script>
+</body>
+</html>

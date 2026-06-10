@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Akun Baru - MCS Master</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+        <div class="text-center mb-8">
+            <!-- Branding Section (hidden by default) -->
+            <div id="branding-section" class="hidden mb-6 animate-in">
+                <img id="developer-logo" src="" alt="Logo Perusahaan" class="w-20 h-20 rounded-full mx-auto mb-4 object-cover bg-slate-200">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Anda sedang mendaftar di bawah</p>
+                <h2 id="developer-name" class="text-lg font-black text-[#F8843F]"></h2>
+            </div>
+
+            <h1 class="text-2xl font-black text-[#2845D6] tracking-tighter italic">DAFTAR AKUN BARU</h1>
+            <p class="text-sm text-slate-500 mt-1">Buat akun untuk bergabung dengan tim Anda.</p>
+        </div>
+        <form id="signup-form" class="space-y-4">
+            <!-- 1. Nama Lengkap -->
+            <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nama Lengkap</label>
+                <input type="text" name="nama_user" required class="input-field">
+            </div>
+            
+            <!-- 2. Username -->
+            <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Username</label>
+                <input type="text" name="username" required class="input-field">
+            </div>
+
+            <!-- 3. Password -->
+            <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Password</label>
+                <input type="password" name="password" required class="input-field">
+            </div>
+
+            <!-- 4. Email -->
+            <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Email</label>
+                <input type="email" name="email" required class="input-field">
+            </div>
+
+            <!-- 5. Nomor WhatsApp -->
+            <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nomor WhatsApp</label>
+                <input type="tel" name="no_whatsapp" required class="input-field" placeholder="Contoh: 08123456789">
+            </div>
+
+            <!-- 6. Posisi / Role -->
+            <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Posisi / Role</label>
+                <select id="role-select" name="role" required class="input-field">
+                    <option value="Agent Freelance">Agent Freelance</option>
+                    <option value="Admin CS">Admin CS</option>
+                    <option value="Developer">Developer (Owner Perusahaan)</option>
+                </select>
+            </div>
+
+            <!-- 7. Perusahaan (Conditional) -->
+            <div id="existing-developer-container">
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Perusahaan</label>
+                <select id="developer-select" name="developer_id" required class="input-field">
+                    <option value="">Memuat perusahaan...</option>
+                </select>
+            </div>
+
+            <div id="new-developer-container" class="hidden space-y-4">
+                 <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nama Perusahaan Baru</label>
+                    <input type="text" name="nama_perusahaan" class="input-field" placeholder="Masukkan nama perusahaan Anda">
+                </div>
+            </div>
+
+            <div class="pt-4">
+                <button type="submit" id="btn-signup" class="w-full py-4 bg-[#2845D6] text-white rounded-xl font-black text-sm uppercase tracking-widest shadow-lg hover:bg-blue-700 transition-all active:scale-95">
+                    Daftar Sekarang
+                </button>
+            </div>
+        </form>
+        <div class="text-center mt-6">
+            <a href="login.html" class="text-xs text-slate-500 hover:text-[#2845D6] font-bold">Sudah punya akun? Login di sini</a>
+        </div>
+    </div>
+
+    <script>
+        // Helper class for inputs
+        document.querySelectorAll('.input-field').forEach(el => {
+            el.classList.add('w-full', 'mt-1', 'p-3', 'bg-slate-50', 'border', 'border-slate-200', 'rounded-xl', 'text-sm', 'font-bold', 'outline-none', 'focus:ring-2', 'focus:ring-[#2845D6]');
+        });
+    </script>
+    <script type="module" src="assets/js/signup.js?v=1.3"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

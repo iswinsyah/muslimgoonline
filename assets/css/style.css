@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    .bg-primary { background-color: #2845D6; }
+    .text-primary { color: #2845D6; }
+    .border-primary { border-color: #2845D6; }
+    .hover\:bg-primary-dark:hover { background-color: #1e3a8a; } /* Darker blue for hover */
+    .bg-primary-dark { background-color: #1e3a8a; }
+    .bg-primary-light { background-color: #eff6ff; } /* Very light blue */
+}
+
+/* Custom Scrollbar dari Prototype */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 10px; } /* Blue-300 */
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+
+.animate-in { animation: fadeIn 0.4s ease-out forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.hide-scroll::-webkit-scrollbar { display: none; }
+.hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
