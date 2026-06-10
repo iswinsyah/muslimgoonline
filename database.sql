@@ -2,18 +2,32 @@
 CREATE TABLE IF NOT EXISTS developers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nama_perusahaan VARCHAR(255) NOT NULL,
-    status_langganan ENUM('Active', 'Inactive') DEFAULT 'Active',
+    company_slug VARCHAR(100) UNIQUE,
+    app_name VARCHAR(255),
+    logo_url VARCHAR(255),
+    notification_email VARCHAR(255),
+    maintenance_mode TINYINT(1) DEFAULT 0,
+    status_langganan ENUM('Active', 'Inactive', 'Pending', 'Rejected') DEFAULT 'Pending',
+    ai_persona_insight TEXT,
+    ai_content_calendar TEXT,
+    ai_creative_caption TEXT,
+    ai_creative_visual TEXT,
+    ai_creative_video TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 2. Tabel Users (Pengguna Aplikasi)
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    developer_id INT NULL, -- NULL jika Super Admin (Milik MGO Pusat)
+    developer_id INT NULL,
     nama_user VARCHAR(100) NOT NULL,
     role ENUM('Super Admin', 'Developer', 'Admin CS', 'Agent Freelance') NOT NULL,
     username VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL, -- Wajib di-hash
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(100),
+    no_whatsapp VARCHAR(20),
+    status ENUM('Active', 'Inactive', 'Rejected') DEFAULT 'Active',
+    is_first_login TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (developer_id) REFERENCES developers(id) ON DELETE SET NULL
 );
