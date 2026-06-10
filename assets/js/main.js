@@ -403,8 +403,8 @@ if (!loggedInUser) {
 
         // Tentukan urutan kategori
         const categoryOrder = [
-            'Operasional Harian',
-            'Strategi & Konten',
+            'OPERASIONAL HARIAN',
+            'STRATEGI & KONTEN',
             'Manajemen Lanjutan',
             'Administrasi Sistem'
         ];
@@ -460,17 +460,17 @@ if (!loggedInUser) {
     function assignCategoriesToMenus(menus) {
         const categoryMap = {
             // Operasional Harian
-            'pipeline': 'Operasional Harian',
-            'tasks': 'Operasional Harian',
-            'calendar': 'Operasional Harian',
-            'ai-lead': 'Operasional Harian',
-            'ai-objection': 'Operasional Harian',
-            'reporting': 'Operasional Harian',
+            'pipeline': 'OPERASIONAL HARIAN',
+            'ai-lead': 'OPERASIONAL HARIAN',
+            'ai-objection': 'OPERASIONAL HARIAN',
+            'tasks': 'OPERASIONAL HARIAN',
+            'calendar': 'OPERASIONAL HARIAN',
+            'reporting': 'OPERASIONAL HARIAN',
 
             // Strategi & Konten
-            'persona': 'Strategi & Konten',
-            'ai-creative': 'Strategi & Konten',
-            'ai-content-calendar': 'Strategi & Konten',
+            'persona': 'STRATEGI & KONTEN',
+            'ai-content-calendar': 'STRATEGI & KONTEN',
+            'ai-creative': 'STRATEGI & KONTEN',
 
             // Manajemen Lanjutan
             'ai-engine': 'Manajemen Lanjutan',
@@ -493,15 +493,15 @@ if (!loggedInUser) {
     // Fungsi untuk menyediakan menu default jika API gagal
     function getDefaultMenus(role) {
         const allMenus = [
-            { menu_id: 'pipeline', label: 'Pipeline', icon: 'trending-up', roles: ['All'] },
-            { menu_id: 'tasks', label: 'Tasks', icon: 'check-square', roles: ['All'] },
-            { menu_id: 'calendar', label: 'Calendar', icon: 'calendar-days', roles: ['All'] },
-            { menu_id: 'ai-lead', label: 'AI Lead Analyzer', icon: 'brain-circuit', roles: ['Developer', 'Admin CS', 'Super Admin'] },
-            { menu_id: 'ai-objection', label: 'AI Objection Handler', icon: 'shield-alert', roles: ['Developer', 'Admin CS', 'Super Admin'] },
-            { menu_id: 'reporting', label: 'Reporting', icon: 'bar-chart-2', roles: ['Developer', 'Super Admin'] },
+            { menu_id: 'pipeline', label: 'Lead & Pipeline', icon: 'trending-up', roles: ['All'] },
+            { menu_id: 'ai-lead', label: 'Lead Analyzer', icon: 'brain-circuit', roles: ['Developer', 'Admin CS', 'Super Admin'] },
+            { menu_id: 'ai-objection', label: 'Objection Gen', icon: 'shield-alert', roles: ['Developer', 'Admin CS', 'Super Admin'] },
+            { menu_id: 'tasks', label: 'Task Manager', icon: 'check-square', roles: ['All'] },
+            { menu_id: 'calendar', label: 'Calender', icon: 'calendar-days', roles: ['All'] },
+            { menu_id: 'reporting', label: 'Weekly Report', icon: 'bar-chart-2', roles: ['Developer', 'Super Admin'] },
             { menu_id: 'persona', label: 'AI Persona Insight', icon: 'user-check', roles: ['Developer', 'Super Admin'] },
-            { menu_id: 'ai-creative', label: 'AI Creative Suite', icon: 'sparkles', roles: ['Developer', 'Super Admin'] },
             { menu_id: 'ai-content-calendar', label: 'AI Content Calendar', icon: 'calendar-plus', roles: ['Developer', 'Super Admin'] },
+            { menu_id: 'ai-creative', label: 'Creative Suite', icon: 'sparkles', roles: ['Developer', 'Super Admin'] },
             { menu_id: 'ai-engine', label: 'AI Engine Config', icon: 'database', roles: ['Developer', 'Super Admin'] },
             { menu_id: 'client-management', label: 'Client Management', icon: 'users', roles: ['Super Admin'] },
             { menu_id: 'team-management', label: 'Team Management', icon: 'user-plus', roles: ['Developer', 'Super Admin'] },

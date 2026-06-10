@@ -31,19 +31,19 @@ try {
             'allowed_roles' => json_encode(['All']), 'sort_order' => 10
         ],
         [
-            'menu_id' => 'tasks', 'label' => 'Task Management', 'icon' => 'check-square',
+            'menu_id' => 'ai-lead', 'label' => 'Lead Analyzer', 'icon' => 'brain-circuit',
             'allowed_roles' => json_encode(['All']), 'sort_order' => 20
         ],
         [
-            'menu_id' => 'calendar', 'label' => 'Calendar', 'icon' => 'calendar',
+            'menu_id' => 'ai-objection', 'label' => 'Objection Gen', 'icon' => 'shield-alert',
             'allowed_roles' => json_encode(['All']), 'sort_order' => 30
         ],
         [
-            'menu_id' => 'ai-lead', 'label' => 'Lead Analyzer', 'icon' => 'brain-circuit',
+            'menu_id' => 'tasks', 'label' => 'Task Manager', 'icon' => 'check-square',
             'allowed_roles' => json_encode(['All']), 'sort_order' => 40
         ],
         [
-            'menu_id' => 'ai-objection', 'label' => 'Objection Gen', 'icon' => 'shield-alert',
+            'menu_id' => 'calendar', 'label' => 'Calender', 'icon' => 'calendar',
             'allowed_roles' => json_encode(['All']), 'sort_order' => 50
         ],
         [
@@ -57,12 +57,12 @@ try {
             'allowed_roles' => json_encode(['Developer', 'Admin CS', 'Super Admin']), 'sort_order' => 70
         ],
         [
-            'menu_id' => 'ai-creative', 'label' => 'Creative Suite', 'icon' => 'sparkles',
-            'allowed_roles' => json_encode(['All']), 'sort_order' => 80
+            'menu_id' => 'ai-content-calendar', 'label' => 'AI Content Calendar', 'icon' => 'calendar-days',
+            'allowed_roles' => json_encode(['Developer', 'Admin CS', 'Super Admin']), 'sort_order' => 80
         ],
         [
-            'menu_id' => 'ai-content-calendar', 'label' => 'AI Content Calendar', 'icon' => 'calendar-days',
-            'allowed_roles' => json_encode(['Developer', 'Admin CS', 'Super Admin']), 'sort_order' => 90
+            'menu_id' => 'ai-creative', 'label' => 'Creative Suite', 'icon' => 'sparkles',
+            'allowed_roles' => json_encode(['All']), 'sort_order' => 90
         ],
         
         // Kategori 3: Manajemen Lanjutan
