@@ -3,9 +3,9 @@
 // Koneksi Database menggunakan PDO (PHP Data Objects) untuk keamanan maksimal
 
 $host = 'localhost';
-$db   = 'u759889304_crmpro';
-$user = 'u759889304_admin';
-$pass = 'Khilafet@1924';     // Sesuai Password yang dibuat di Hostinger Baru
+$db   = 'u829486010_crmprosyar';
+$user = 'u829486010_crmprosyar';
+$pass = 'Khilafet@1924';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
