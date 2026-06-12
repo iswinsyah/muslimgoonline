@@ -497,7 +497,7 @@ if (!loggedInUser) {
             { menu_id: 'ai-lead', label: 'Lead Analyzer', icon: 'brain-circuit', roles: ['Developer', 'Admin CS', 'Super Admin'] },
             { menu_id: 'ai-objection', label: 'Objection Gen', icon: 'shield-alert', roles: ['Developer', 'Admin CS', 'Super Admin'] },
             { menu_id: 'tasks', label: 'Task Manager', icon: 'check-square', roles: ['All'] },
-            { menu_id: 'calendar', label: 'Calender', icon: 'calendar-days', roles: ['All'] },
+            { menu_id: 'calendar', label: 'Calendar', icon: 'calendar-days', roles: ['All'] },
             { menu_id: 'reporting', label: 'Weekly Report', icon: 'bar-chart-2', roles: ['Developer', 'Super Admin'] },
             { menu_id: 'persona', label: 'AI Persona Insight', icon: 'user-check', roles: ['Developer', 'Super Admin'] },
             { menu_id: 'ai-content-calendar', label: 'AI Content Calendar', icon: 'calendar-plus', roles: ['Developer', 'Super Admin'] },

@@ -43,7 +43,7 @@ try {
             'allowed_roles' => json_encode(['All']), 'sort_order' => 40
         ],
         [
-            'menu_id' => 'calendar', 'label' => 'Calender', 'icon' => 'calendar',
+            'menu_id' => 'calendar', 'label' => 'Calendar', 'icon' => 'calendar',
             'allowed_roles' => json_encode(['All']), 'sort_order' => 50
         ],
         [
