@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS developers (
     ai_creative_caption TEXT,
     ai_creative_visual TEXT,
     ai_creative_video TEXT,
+    wa_number VARCHAR(20),
+    ai_cs_instruction TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

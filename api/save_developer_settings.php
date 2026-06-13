@@ -14,6 +14,8 @@ $ai_content_calendar = $_POST['ai_content_calendar'] ?? null; // Data baru dari 
 $ai_creative_caption = $_POST['ai_creative_caption'] ?? null;
 $ai_creative_visual = $_POST['ai_creative_visual'] ?? null;
 $ai_creative_video = $_POST['ai_creative_video'] ?? null;
+$wa_number = $_POST['wa_number'] ?? null;
+$ai_cs_instruction = $_POST['ai_cs_instruction'] ?? null;
 $logo_file = $_FILES['logo'] ?? null;
 
 if (!$developer_id) {
@@ -99,11 +101,18 @@ try {
         $message = 'Hasil Video Script berhasil disimpan!';
         $is_specific_update = true;
     }
+    if ($ai_cs_instruction !== null) {
+        $decoded_data = base64_decode($ai_cs_instruction);
+        $stmt = $pdo->prepare("UPDATE developers SET ai_cs_instruction = ?, wa_number = ? WHERE id = ?");
+        $stmt->execute([$decoded_data, $wa_number, $developer_id]);
+        $message = 'Konfigurasi CS AI berhasil diperbarui!';
+        $is_specific_update = true;
+    }
 
     // If no specific AI field was sent, and it's a full form submission
     if (!$is_specific_update && $app_name !== null) {
-        $stmt = $pdo->prepare("UPDATE developers SET app_name = ?, notification_email = ?, logo_url = ?, maintenance_mode = ? WHERE id = ?");
-        $stmt->execute([$app_name, $notification_email, $logo_url, $maintenance_mode, $developer_id]);
+        $stmt = $pdo->prepare("UPDATE developers SET app_name = ?, notification_email = ?, logo_url = ?, maintenance_mode = ?, wa_number = ? WHERE id = ?");
+        $stmt->execute([$app_name, $notification_email, $logo_url, $maintenance_mode, $wa_number, $developer_id]);
     }
 
     echo json_encode(['message' => $message, 'new_logo_url' => $logo_url]);
