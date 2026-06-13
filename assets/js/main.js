@@ -15,6 +15,7 @@ import { ImpersonationComponent } from './components/impersonation.js';
 import { SettingsComponent } from './components/settings.js';
 import { TeamManagementComponent } from './components/team_management.js';
 import { BuyerListComponent } from './components/buyer_list.js';
+import { TokenPoolComponent } from './components/token_pool.js';
 
 // --- Cek Sesi Login ---
 const loggedInUser = JSON.parse(localStorage.getItem('mgo_user'));
@@ -49,6 +50,7 @@ if (!loggedInUser) {
     let menuManagementComponent = null;
     let impersonationComponent = null;
     let buyerListComponent = null;
+    let tokenPoolComponent = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
         await initializeApp();
@@ -408,6 +410,10 @@ if (!loggedInUser) {
             mainContent.innerHTML = `<section id="tab-impersonation" class="h-full overflow-y-auto custom-scrollbar pb-10 animate-in"></section>`;
             impersonationComponent = new ImpersonationComponent('tab-impersonation');
             impersonationComponent.render();
+        } else if (tabId === 'token-pool') {
+            mainContent.innerHTML = `<section id="tab-token-pool" class="h-full overflow-y-auto custom-scrollbar pb-10 animate-in"></section>`;
+            tokenPoolComponent = new TokenPoolComponent('tab-token-pool');
+            tokenPoolComponent.render();
         } else {
             mainContent.innerHTML = `<div class="p-10 text-center text-slate-400">Modul ${tabId} belum dimigrasi.</div>`;
         }
@@ -437,7 +443,15 @@ if (!loggedInUser) {
             return acc;
         }, {});
 
-        categoryOrder.forEach(category => {
+        // Tambahkan kategori lain secara dinamis jika ada di database tetapi belum ada di categoryOrder
+        const allCategories = [...categoryOrder];
+        Object.keys(groupedMenus).forEach(category => {
+            if (!allCategories.includes(category)) {
+                allCategories.push(category);
+            }
+        });
+
+        allCategories.forEach(category => {
             const menusInCategory = groupedMenus[category];
             if (!menusInCategory) return;
 
@@ -450,7 +464,8 @@ if (!loggedInUser) {
 
             const catHeader = document.createElement('p');
             catHeader.className = "text-[9px] text-blue-300 font-black uppercase tracking-widest mb-2 mt-5 md:mt-6 pl-2";
-            catHeader.innerText = category;
+            // Jika kategori adalah Uncategorized, tampilkan sebagai LAIN-LAIN
+            catHeader.innerText = category === 'Uncategorized' ? 'LAIN-LAIN' : category;
             sidebarMenu.appendChild(catHeader);
 
             accessibleMenus.forEach(menu => {
@@ -461,7 +476,7 @@ if (!loggedInUser) {
                     isActive ? 'bg-[#2845D6] text-white shadow-lg' : 'text-blue-100 hover:bg-blue-800/50 hover:text-white'
                 }`;
                 btn.innerHTML = `
-                    <i data-lucide="${menu.icon}" class="w-[16px] h-[16px] md:w-[18px] md:h-[18px] mr-3"></i>
+                    <i data-lucide="${menu.icon || 'circle'}" class="w-[16px] h-[16px] md:w-[18px] md:h-[18px] mr-3"></i>
                     <span class="font-bold text-[10px] uppercase tracking-wider">${menu.label}</span>
                 `;
                 
@@ -501,6 +516,7 @@ if (!loggedInUser) {
             // Administrasi Sistem
             'menu-management': 'Administrasi Sistem',
             'impersonation': 'Administrasi Sistem',
+            'token-pool': 'Administrasi Sistem',
             'settings': 'Administrasi Sistem',
         };
         return menus.map(menu => {
@@ -529,6 +545,7 @@ if (!loggedInUser) {
             { menu_id: 'portfolio', label: 'Portfolio', icon: 'briefcase', roles: ['Super Admin'] },
             { menu_id: 'menu-management', label: 'Menu Management', icon: 'list', roles: ['Super Admin'] },
             { menu_id: 'impersonation', label: 'Impersonation', icon: 'user-cog', roles: ['Super Admin'] },
+            { menu_id: 'token-pool', label: 'Gudang Token', icon: 'key', roles: ['Super Admin'] },
             { menu_id: 'settings', label: 'Settings', icon: 'settings', roles: ['Developer', 'Super Admin'] },
         ];
         return allMenus.filter(menu => menu.roles.includes('All') || menu.roles.includes(role));

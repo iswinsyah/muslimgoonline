@@ -79,6 +79,10 @@ try {
             'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 110
         ],
         [
+            'menu_id' => 'team-management', 'label' => 'Team Management', 'icon' => 'user-plus',
+            'allowed_roles' => json_encode(['Developer', 'Super Admin']), 'sort_order' => 115
+        ],
+        [
             'menu_id' => 'validation', 'label' => 'Validasi Pendaftar', 'icon' => 'shield-check',
             'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 120
         ],
@@ -95,6 +99,10 @@ try {
         [
             'menu_id' => 'impersonation', 'label' => 'Mode Penyamaran', 'icon' => 'user-cog',
             'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 150
+        ],
+        [
+            'menu_id' => 'token-pool', 'label' => 'Gudang Token', 'icon' => 'key',
+            'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 155
         ],
         [
             'menu_id' => 'settings', 'label' => 'Settings', 'icon' => 'settings',
