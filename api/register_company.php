@@ -5,6 +5,7 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 
 require_once 'db_connect_pdo.php';
+require_once 'config.php';
 
 try {
     // --- Validasi Input ---
@@ -77,6 +78,26 @@ try {
 
     // --- Selesaikan Transaksi ---
     $pdo->commit();
+
+    // --- Kirim Notifikasi WhatsApp ke Super Admin ---
+    if (defined('FONNTE_TOKEN_ADMIN') && FONNTE_TOKEN_ADMIN !== 'PASTE_TOKEN_FONNTE_ADMIN_DISINI') {
+        $msg_wa = "Ada pendaftar baru di CRM ProSyariah dengan nama " . $_POST['nama_user'] . " nomor whatsapp " . $_POST['kontak_perusahaan'] . "}";
+        
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://api.fonnte.com/send',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POSTFIELDS => array(
+                'target' => SUPER_ADMIN_WA,
+                'message' => $msg_wa,
+            ),
+            CURLOPT_HTTPHEADER => array(
+                "Authorization: " . FONNTE_TOKEN_ADMIN
+            ),
+        ));
+        curl_exec($curl);
+        curl_close($curl);
+    }
 
     echo json_encode(["message" => "Registrasi perusahaan berhasil! Akun Anda akan segera divalidasi oleh Super Admin dalam 1x24 jam."]);
 
