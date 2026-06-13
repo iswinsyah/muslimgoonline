@@ -12,6 +12,8 @@ export class BuyerListComponent {
     async render() {
         this.container.innerHTML = this.ui.renderLoading('Memuat akumulasi data buyer...');
         try {
+            // getLeads di API sudah otomatis mengisolasi data berdasarkan role 
+            // (Developer akan melihat semua data milik perusahaannya)
             const leads = await ApiService.getLeads(this.state.currentUser.id, this.state.currentUser.role);
             
             this.container.innerHTML = `
@@ -47,7 +49,12 @@ export class BuyerListComponent {
                                         <td class="p-4">
                                             <span class="px-2 py-1 bg-teal-50 text-teal-700 rounded text-[9px] font-black uppercase">${l.status.replace('_', ' ')}</span>
                                         </td>
-                                        <td class="p-4 font-bold text-blue-600">${l.owner_name || 'Admin'}</td>
+                                        <td class="p-4 font-bold text-blue-600">
+                                            <div class="flex items-center">
+                                                <i data-lucide="user-check" class="w-3 h-3 mr-1.5 opacity-50"></i>
+                                                ${l.owner_name || 'Admin'}
+                                            </div>
+                                        </td>
                                         <td class="p-4 text-slate-400 text-[10px] italic">${new Date(l.created_at).toLocaleDateString('id-ID')}</td>
                                     </tr>
                                 `).join('')}
