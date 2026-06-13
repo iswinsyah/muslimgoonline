@@ -16,6 +16,8 @@ export class BuyerListComponent {
             // (Developer akan melihat semua data milik perusahaannya)
             const leads = await ApiService.getLeads(this.state.currentUser.id, this.state.currentUser.role);
             
+            const isSuperAdmin = this.state.currentUser.role === 'Super Admin';
+
             this.container.innerHTML = `
                 <div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden animate-in">
                     <div class="p-6 md:p-8 border-b bg-slate-50/50 flex justify-between items-center">
@@ -34,6 +36,7 @@ export class BuyerListComponent {
                                     <th class="p-4">Nama Buyer / NIK</th>
                                     <th class="p-4">WhatsApp</th>
                                     <th class="p-4">Status</th>
+                                    ${isSuperAdmin ? '<th class="p-4">Perusahaan</th>' : ''}
                                     <th class="p-4">Ditangani Oleh</th>
                                     <th class="p-4">Tgl Masuk</th>
                                 </tr>
@@ -49,6 +52,7 @@ export class BuyerListComponent {
                                         <td class="p-4">
                                             <span class="px-2 py-1 bg-teal-50 text-teal-700 rounded text-[9px] font-black uppercase">${l.status.replace('_', ' ')}</span>
                                         </td>
+                                        ${isSuperAdmin ? `<td class="p-4 font-bold text-orange-600">${l.nama_perusahaan || '-'}</td>` : ''}
                                         <td class="p-4 font-bold text-blue-600">
                                             <div class="flex items-center">
                                                 <i data-lucide="user-check" class="w-3 h-3 mr-1.5 opacity-50"></i>
