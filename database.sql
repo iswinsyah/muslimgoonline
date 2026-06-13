@@ -68,3 +68,13 @@ CREATE TABLE IF NOT EXISTS tasks (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE SET NULL
 );
+
+-- 5. Tabel Pool Token Fonnte (Gudang Token untuk AI Provisioning)
+CREATE TABLE IF NOT EXISTS fonnte_tokens_pool (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    wa_number VARCHAR(20) NOT NULL, -- Nomor yang terhubung ke token ini
+    status ENUM('Available', 'Used') DEFAULT 'Available',
+    assigned_to_developer_id INT NULL,
+    FOREIGN KEY (assigned_to_developer_id) REFERENCES developers(id) ON DELETE SET NULL
+);

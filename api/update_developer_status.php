@@ -23,6 +23,23 @@ if (!$developer_id || !in_array($new_status, ['Active', 'Rejected'])) {
 try {
     $pdo->beginTransaction();
 
+    // --- AI PROVISIONING AGENT LOGIC ---
+    // Jika status Active dan Bos tidak input token manual, cari di Pool
+    if ($new_status === 'Active' && empty($fonnte_token)) {
+        $stmtPool = $pdo->prepare("SELECT id, token, wa_number FROM fonnte_tokens_pool WHERE status = 'Available' LIMIT 1");
+        $stmtPool->execute();
+        $poolItem = $stmtPool->fetch();
+
+        if ($poolItem) {
+            $fonnte_token = $poolItem['token'];
+            $wa_number = $poolItem['wa_number'];
+            
+            // Tandai token di gudang sudah terpakai
+            $stmtUpdatePool = $pdo->prepare("UPDATE fonnte_tokens_pool SET status = 'Used', assigned_to_developer_id = ? WHERE id = ?");
+            $stmtUpdatePool->execute([$developer_id, $poolItem['id']]);
+        }
+    }
+
     // 1. Update status di tabel developers
     $stmtDev = $pdo->prepare("UPDATE developers SET status_langganan = ?, fonnte_token = ?, wa_number = ? WHERE id = ?");
     $stmtDev->execute([$new_status, $fonnte_token, $wa_number, $developer_id]);

@@ -42,6 +42,12 @@ export class ValidationComponent {
                 <td class="p-4 text-slate-600">${dev.kontak}</td>
                 <td class="p-4 text-slate-500 text-xs">${new Date(dev.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</td>
                 <td class="p-4">
+                    <div class="space-y-2">
+                        <input type="text" placeholder="Token (Kosongkan = Auto AI)" class="fonnte-token-input w-full p-2 border rounded-lg text-[10px] font-mono shadow-sm focus:ring-1 focus:ring-teal-500 outline-none" />
+                        <input type="text" placeholder="No WA (Kosongkan = Auto AI)" value="${dev.kontak}" class="wa-number-input w-full p-2 border rounded-lg text-[10px] font-mono shadow-sm focus:ring-1 focus:ring-teal-500 outline-none" />
+                    </div>
+                </td>
+                <td class="p-4">
                     <a href="/${dev.bukti_pembayaran}" target="_blank" class="text-xs font-bold text-teal-600 hover:underline">Lihat Bukti</a>
                 </td>
                 <td class="p-4 flex items-center space-x-2">
@@ -67,6 +73,7 @@ export class ValidationComponent {
                                 <th class="p-4">Nama Pemilik</th>
                                 <th class="p-4">Kontak</th>
                                 <th class="p-4">Tanggal Daftar</th>
+                                <th class="p-4">Konfigurasi CS AI</th>
                                 <th class="p-4">Pembayaran</th>
                                 <th class="p-4">Aksi</th>
                             </tr>
@@ -89,7 +96,11 @@ export class ValidationComponent {
                 const action = btn.dataset.action;
                 const status = action === 'approve' ? 'Active' : 'Rejected';
 
+                const fonnteToken = row.querySelector('.fonnte-token-input').value;
+                const waNumber = row.querySelector('.wa-number-input').value;
+
                 const companyName = row.querySelector('td').innerText;
+
                 if (!confirm(`Apakah Anda yakin ingin ${action} pendaftaran untuk "${companyName}"?`)) {
                     return;
                 }
@@ -99,7 +110,14 @@ export class ValidationComponent {
                 if (window.lucide) window.lucide.createIcons();
 
                 try {
-                    const response = await ApiService.updateDeveloperStatus(developerId, status);
+                    // Update API Service call to include token and wa
+                    const response = await ApiService.post('update_developer_status.php', {
+                        developer_id: developerId,
+                        status: status,
+                        fonnte_token: fonnteToken,
+                        wa_number: waNumber
+                    });
+
                     this.ui.showToast(response.message);
                     
                     // Remove the row from the UI
