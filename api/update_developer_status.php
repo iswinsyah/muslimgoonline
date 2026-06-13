@@ -11,6 +11,8 @@ require_once 'db_connect_pdo.php';
 $data = json_decode(file_get_contents("php://input"), true);
 $developer_id = $data['developer_id'] ?? null;
 $new_status = $data['status'] ?? null; // 'Active' or 'Rejected'
+$fonnte_token = $data['fonnte_token'] ?? null;
+$wa_number = $data['wa_number'] ?? null;
 
 if (!$developer_id || !in_array($new_status, ['Active', 'Rejected'])) {
     http_response_code(400);
@@ -22,8 +24,8 @@ try {
     $pdo->beginTransaction();
 
     // 1. Update status di tabel developers
-    $stmtDev = $pdo->prepare("UPDATE developers SET status_langganan = ? WHERE id = ?");
-    $stmtDev->execute([$new_status, $developer_id]);
+    $stmtDev = $pdo->prepare("UPDATE developers SET status_langganan = ?, fonnte_token = ?, wa_number = ? WHERE id = ?");
+    $stmtDev->execute([$new_status, $fonnte_token, $wa_number, $developer_id]);
 
     // 2. Update status di tabel users untuk owner-nya
     $user_status = ($new_status === 'Active') ? 'Active' : 'Rejected';
