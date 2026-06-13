@@ -1,0 +1,81 @@
+<?php
+// api/whatsapp_webhook.php
+// Webhook untuk integrasi Fonnte (WhatsApp Gateway) + Gemini AI
+header("Content-Type: application/json");
+require_once 'db_connect_pdo.php';
+require_once 'config.php';
+
+// Ambil data yang dikirim oleh Fonnte via POST
+$sender = $_POST['sender'] ?? null;   // Nomor pengirim (Calon Pembeli)
+$message = $_POST['message'] ?? null; // Pesan yang dikirim
+$device = $_POST['device'] ?? null;   // Nomor WA Tenant (penerima/device yang terdaftar)
+
+if (!$sender || !$message || !$device) {
+    // Abaikan jika data tidak lengkap
+    exit;
+}
+
+try {
+    // 1. Identifikasi Tenant (Developer) berdasarkan nomor device (WA mereka)
+    $stmt = $pdo->prepare("SELECT id, nama_perusahaan, ai_cs_instruction FROM developers WHERE wa_number = ?");
+    $stmt->execute([$device]);
+    $tenant = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$tenant) {
+        // Jika nomor device tidak terdaftar di sistem kita, abaikan
+        exit;
+    }
+
+    $instruction = $tenant['ai_cs_instruction'] ?: "Anda adalah Customer Service properti syariah yang ramah dan membantu.";
+    $nama_perusahaan = $tenant['nama_perusahaan'];
+
+    // 2. Bangun Prompt untuk Gemini AI
+    $prompt = "Anda adalah AI Customer Service untuk perusahaan properti bernama '$nama_perusahaan'. 
+Gunakan instruksi khusus berikut dalam melayani: 
+$instruction
+
+Pertanyaan Calon Pembeli: \"$message\"
+
+Berikan jawaban yang singkat, padat, persuasif, dan sangat ramah. Jangan gunakan format markdown yang rumit (seperti bold berlebih atau tabel) karena pesan ini dikirim via WhatsApp.";
+
+    // 3. Panggil API Gemini (Re-use logic dari gemini.php)
+    $ai_answer = callGeminiAI($prompt);
+
+    // 4. Balas ke WhatsApp menggunakan API Fonnte
+    sendToFonnte($sender, $ai_answer);
+
+} catch (Exception $e) {
+    error_log("WA Webhook Error: " . $e->getMessage());
+}
+
+function callGeminiAI($prompt) {
+    // Gunakan model yang sudah disetting di gemini.php
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" . GEMINI_API_KEY;
+    $payload = ["contents" => [["parts" => [["text" => $prompt]]]]];
+    
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
+    
+    $response = curl_exec($ch);
+    curl_close($ch);
+    
+    $decoded = json_decode($response, true);
+    return $decoded['candidates'][0]['content']['parts'][0]['text'] ?? "Maaf, saat ini layanan asisten otomatis kami sedang dalam pemeliharaan. Mohon tinggalkan pesan, admin kami akan segera menghubungi Anda.";
+}
+
+function sendToFonnte($target, $msg) {
+    // Token Fonnte (Disarankan ditaruh di config.php atau tabel settings)
+    $token = "PASTE_TOKEN_FONNTE_ANDA_DISINI"; 
+    
+    $data = ['target' => $target, 'message' => $msg];
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array("Authorization: $token"));
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+    curl_setopt($curl, CURLOPT_URL, "https://api.fonnte.com/send");
+    curl_exec($curl);
+    curl_close($curl);
+}
