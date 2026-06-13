@@ -15,6 +15,7 @@ $ai_creative_caption = $_POST['ai_creative_caption'] ?? null;
 $ai_creative_visual = $_POST['ai_creative_visual'] ?? null;
 $ai_creative_video = $_POST['ai_creative_video'] ?? null;
 $wa_number = $_POST['wa_number'] ?? null;
+$fonnte_token = $_POST['fonnte_token'] ?? null;
 $ai_cs_instruction = $_POST['ai_cs_instruction'] ?? null;
 $logo_file = $_FILES['logo'] ?? null;
 
@@ -103,8 +104,8 @@ try {
     }
     if ($ai_cs_instruction !== null) {
         $decoded_data = base64_decode($ai_cs_instruction);
-        $stmt = $pdo->prepare("UPDATE developers SET ai_cs_instruction = ?, wa_number = ? WHERE id = ?");
-        $stmt->execute([$decoded_data, $wa_number, $developer_id]);
+        $stmt = $pdo->prepare("UPDATE developers SET ai_cs_instruction = ?, wa_number = ?, fonnte_token = ? WHERE id = ?");
+        $stmt->execute([$decoded_data, $wa_number, $fonnte_token, $developer_id]);
         $message = 'Konfigurasi CS AI berhasil diperbarui!';
         $is_specific_update = true;
     }

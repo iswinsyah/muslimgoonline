@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS developers (
     ai_creative_video TEXT,
     wa_number VARCHAR(20),
     ai_cs_instruction TEXT,
+    fonnte_token VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

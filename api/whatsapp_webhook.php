@@ -17,12 +17,17 @@ if (!$sender || !$message || !$device) {
 
 try {
     // 1. Identifikasi Tenant (Developer) berdasarkan nomor device (WA mereka)
-    $stmt = $pdo->prepare("SELECT id, nama_perusahaan, ai_cs_instruction FROM developers WHERE wa_number = ?");
+    $stmt = $pdo->prepare("SELECT id, nama_perusahaan, ai_cs_instruction, fonnte_token FROM developers WHERE wa_number = ?");
     $stmt->execute([$device]);
     $tenant = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$tenant) {
         // Jika nomor device tidak terdaftar di sistem kita, abaikan
+        exit;
+    }
+
+    if (empty($tenant['fonnte_token'])) {
+        // Jika tenant belum punya token, sistem tidak bisa membalas
         exit;
     }
 
@@ -42,7 +47,7 @@ Berikan jawaban yang singkat, padat, persuasif, dan sangat ramah. Jangan gunakan
     $ai_answer = callGeminiAI($prompt);
 
     // 4. Balas ke WhatsApp menggunakan API Fonnte
-    sendToFonnte($sender, $ai_answer);
+    sendToFonnte($sender, $ai_answer, $tenant['fonnte_token']);
 
 } catch (Exception $e) {
     error_log("WA Webhook Error: " . $e->getMessage());
@@ -66,10 +71,7 @@ function callGeminiAI($prompt) {
     return $decoded['candidates'][0]['content']['parts'][0]['text'] ?? "Maaf, saat ini layanan asisten otomatis kami sedang dalam pemeliharaan. Mohon tinggalkan pesan, admin kami akan segera menghubungi Anda.";
 }
 
-function sendToFonnte($target, $msg) {
-    // Token Fonnte (Disarankan ditaruh di config.php atau tabel settings)
-    $token = "PASTE_TOKEN_FONNTE_ANDA_DISINI"; 
-    
+function sendToFonnte($target, $msg, $token) {
     $data = ['target' => $target, 'message' => $msg];
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_HTTPHEADER, array("Authorization: $token"));
