@@ -1,8 +1,8 @@
 <?php
 // api/db_connect.php
 $host = 'localhost';
-$dbname = 'u759889304_crmpro';
-$username = 'u759889304_admin';
+$dbname = 'u829486010_crmprosyar';
+$username = 'u829486010_crmprosyar';
 $password = 'Khilafet@1924'; 
 
 try {
