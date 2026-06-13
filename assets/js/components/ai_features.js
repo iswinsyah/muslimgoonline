@@ -583,12 +583,12 @@ export class AiEngineConfigComponent {
                 <div class="bg-white p-6 md:p-10 rounded-[2rem] border border-slate-200 shadow-sm">
                     <div class="flex flex-col md:flex-row items-center text-center md:text-left mb-8 border-b pb-6">
                         <i data-lucide="database" class="w-8 h-8 text-teal-600 mb-3 md:mb-0 md:mr-4"></i>
-                        <div><h3 class="text-sm md:text-lg font-black text-slate-800 uppercase tracking-widest italic">AI Engine Configuration</h3><p class="text-[10px] md:text-xs text-slate-500 font-medium mt-1">Pengaturan parameter dasar kecerdasan buatan MCS Master.</p></div>
+                        <div><h3 class="text-sm md:text-lg font-black text-slate-800 uppercase tracking-widest italic">AI Engine Configuration</h3><p class="text-[10px] md:text-xs text-slate-500 font-medium mt-1">Pengaturan parameter dasar kecerdasan buatan CRM Pro Syariah.</p></div>
                     </div>
                     <div class="space-y-6">
                         <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100">
                             <div class="flex justify-between items-center mb-3"><label class="text-[9px] font-black text-slate-700 uppercase tracking-widest">Model Pembelajaran AI</label><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[8px] font-black uppercase">Active</span></div>
-                            <select class="w-full bg-white border p-3 md:p-4 rounded-xl text-[10px] md:text-xs font-bold outline-none shadow-sm"><option>MCS Real Estate Model v2.4 (Optimized)</option><option>General Sales Model v1.1</option></select>
+                            <select class="w-full bg-white border p-3 md:p-4 rounded-xl text-[10px] md:text-xs font-bold outline-none shadow-sm"><option>CRM Pro Syariah Real Estate Model v2.4 (Optimized)</option><option>General Sales Model v1.1</option></select>
                         </div>
                         <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100">
                             <label class="text-[9px] font-black text-slate-700 uppercase tracking-widest mb-3 block">Temperature (Kreativitas vs Presisi)</label>
