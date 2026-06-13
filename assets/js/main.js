@@ -67,6 +67,16 @@ if (!loggedInUser) {
             let fetchedMenus = [];
             try {
                 fetchedMenus = await ApiService.get('get_menus.php');
+                
+                // Normalisasi data dari database (allowed_roles string -> roles Array)
+                fetchedMenus = Array.isArray(fetchedMenus) ? fetchedMenus : (fetchedMenus.data || []);
+                fetchedMenus = fetchedMenus.map(m => {
+                    let r = m.roles || m.allowed_roles || ['Super Admin'];
+                    if (typeof r === 'string') {
+                        try { r = JSON.parse(r); } catch(e) { r = ['Super Admin']; }
+                    }
+                    return { ...m, roles: r };
+                });
             } catch (error) {
                 console.error("CRM Pro: Gagal memuat menu dari server. Mengalihkan ke menu default.", error);
                 fetchedMenus = getDefaultMenus(state.currentRole);
