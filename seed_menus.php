@@ -31,6 +31,10 @@ try {
             'allowed_roles' => json_encode(['All']), 'sort_order' => 10
         ],
         [
+            'menu_id' => 'buyer-list', 'label' => 'Daftar Buyer', 'icon' => 'users',
+            'allowed_roles' => json_encode(['Developer', 'Super Admin']), 'sort_order' => 15
+        ],
+        [
             'menu_id' => 'ai-lead', 'label' => 'Lead Analyzer', 'icon' => 'brain-circuit',
             'allowed_roles' => json_encode(['All']), 'sort_order' => 20
         ],

@@ -14,6 +14,7 @@ import { MenuManagementComponent } from './components/menu_management.js';
 import { ImpersonationComponent } from './components/impersonation.js';
 import { SettingsComponent } from './components/settings.js';
 import { TeamManagementComponent } from './components/team_management.js';
+import { BuyerListComponent } from './components/buyer_list.js';
 
 // --- Cek Sesi Login ---
 const loggedInUser = JSON.parse(localStorage.getItem('mgo_user'));
@@ -47,6 +48,7 @@ if (!loggedInUser) {
     let settingsComponent = null;
     let menuManagementComponent = null;
     let impersonationComponent = null;
+    let buyerListComponent = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
         await initializeApp();
@@ -328,6 +330,10 @@ if (!loggedInUser) {
             mainContent.innerHTML = `<section id="tab-pipeline" class="h-full flex flex-col animate-in"></section>`;
             pipelineComponent = new PipelineComponent('tab-pipeline', state);
             pipelineComponent.render();
+        } else if (tabId === 'buyer-list') {
+            mainContent.innerHTML = `<section id="tab-buyer-list" class="h-full overflow-y-auto custom-scrollbar pb-10 animate-in"></section>`;
+            buyerListComponent = new BuyerListComponent('tab-buyer-list', state);
+            buyerListComponent.render();
         } else if (tabId === 'portfolio') {
             mainContent.innerHTML = `<section id="tab-portfolio" class="h-full overflow-y-auto custom-scrollbar pb-10 animate-in"></section>`;
             portfolioComponent = new PortfolioComponent('tab-portfolio', state);
@@ -463,6 +469,7 @@ if (!loggedInUser) {
         const categoryMap = {
             // Operasional Harian
             'pipeline': 'OPERASIONAL HARIAN',
+            'buyer-list': 'OPERASIONAL HARIAN',
             'ai-lead': 'OPERASIONAL HARIAN',
             'ai-objection': 'OPERASIONAL HARIAN',
             'tasks': 'OPERASIONAL HARIAN',
@@ -496,6 +503,7 @@ if (!loggedInUser) {
     function getDefaultMenus(role) {
         const allMenus = [
             { menu_id: 'pipeline', label: 'Lead & Pipeline', icon: 'trending-up', roles: ['All'] },
+            { menu_id: 'buyer-list', label: 'Daftar Buyer', icon: 'users', roles: ['Developer', 'Super Admin'] },
             { menu_id: 'ai-lead', label: 'Lead Analyzer', icon: 'brain-circuit', roles: ['Developer', 'Admin CS', 'Super Admin'] },
             { menu_id: 'ai-objection', label: 'Objection Gen', icon: 'shield-alert', roles: ['Developer', 'Admin CS', 'Super Admin'] },
             { menu_id: 'tasks', label: 'Task Manager', icon: 'check-square', roles: ['All'] },
