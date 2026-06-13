@@ -1,6 +1,5 @@
 import { ApiService } from '../api.js';
 import { UI } from '../ui.js';
-import { maskInfo } from '../helpers.js';
 
 export class BuyerListComponent {
     constructor(elementId, state) {
@@ -48,7 +47,7 @@ export class BuyerListComponent {
                                             <p class="font-bold text-slate-800">${l.name}</p>
                                             <p class="text-[9px] text-slate-400 font-mono">${l.nik || '-'}</p>
                                         </td>
-                                        <td class="p-4 font-bold text-slate-600">${maskInfo(l.phone, l.owner, this.state.currentUser.role, 'phone')}</td>
+                                        <td class="p-4 font-bold text-slate-600">${l.phone || '-'}</td>
                                         <td class="p-4">
                                             <span class="px-2 py-1 bg-teal-50 text-teal-700 rounded text-[9px] font-black uppercase">${l.status.replace('_', ' ')}</span>
                                         </td>
