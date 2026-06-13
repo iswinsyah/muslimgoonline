@@ -37,6 +37,6 @@ try {
 } catch (PDOException $e) {
     http_response_code(500);
     error_log("Login Error: " . $e->getMessage());
-    echo json_encode(['message' => 'Terjadi kesalahan pada server.']);
+    echo json_encode(['message' => 'Terjadi kesalahan pada server: ' . $e->getMessage()]);
 }
 ?>
