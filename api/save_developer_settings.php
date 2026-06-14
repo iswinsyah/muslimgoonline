@@ -110,13 +110,7 @@ try {
         $message = 'Hasil Video Script berhasil disimpan!';
         $is_specific_update = true;
     }
-    if ($ai_cs_instruction !== null) {
-        $decoded_data = base64_decode($ai_cs_instruction);
-        $stmt = $pdo->prepare("UPDATE developers SET ai_cs_instruction = ?, wa_number = ?, fonnte_token = ? WHERE id = ?");
-        $stmt->execute([$decoded_data, $wa_number, $fonnte_token, $developer_id]);
-        $message = 'Konfigurasi CS AI berhasil diperbarui!';
-        $is_specific_update = true;
-    }
+
 
     // If no specific AI field was sent, and it's a full form submission
     if (!$is_specific_update && $app_name !== null) {
