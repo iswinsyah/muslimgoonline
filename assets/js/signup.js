@@ -1,3 +1,4 @@
+// Trigger redeploy: 1
 import { ApiService } from './api.js';
 
 async function handleReferral() {
