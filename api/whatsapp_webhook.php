@@ -10,9 +10,26 @@ $sender = $_POST['sender'] ?? null;   // Nomor pengirim (Calon Pembeli)
 $message = $_POST['message'] ?? null; // Pesan yang dikirim
 $device = $_POST['device'] ?? null;   // Nomor WA Tenant (penerima/device yang terdaftar)
 
+// Cek jika data dikirim sebagai JSON
+if (empty($_POST)) {
+    $json = file_get_contents('php://input');
+    $data = json_decode($json, true);
+    if ($data) {
+        $sender = $data['sender'] ?? null;
+        $message = $data['message'] ?? null;
+        $device = $data['device'] ?? null;
+    }
+}
+
 if (!$sender || !$message || !$device) {
     // Abaikan jika data tidak lengkap
     exit;
+}
+
+// Normalisasi nomor device (WhatsApp Penerima) ke format standard 62
+$device = preg_replace('/\D/', '', $device);
+if (strpos($device, '0') === 0) {
+    $device = '62' . substr($device, 1);
 }
 
 try {

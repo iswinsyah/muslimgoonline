@@ -58,7 +58,7 @@ export class SettingsComponent {
                     </div>
 
                     <!-- 2. System Control -->
-                    <div class="space-y-4">
+                    <div class="space-y-4 border-b border-slate-100 pb-6">
                          <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Kontrol Sistem</h4>
                          <div class="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-200">
                             <div>
@@ -70,6 +70,39 @@ export class SettingsComponent {
                                 <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                             </label>
                          </div>
+                    </div>
+
+                    <!-- 3. Konfigurasi CS AI & WhatsApp Gateway -->
+                    <div class="space-y-4 pt-2">
+                        <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">CS AI & WhatsApp Gateway</h4>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nomor WhatsApp Gateway</label>
+                                <input type="text" name="wa_number" value="${settings.wa_number || ''}" placeholder="Contoh: 081234567890" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#2845D6]" />
+                                <p class="text-[9px] text-slate-400 mt-1">Nomor WhatsApp yang terhubung dengan akun Fonnte Anda.</p>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fonnte API Token</label>
+                                <input type="password" name="fonnte_token" value="${settings.fonnte_token || ''}" placeholder="Masukkan Fonnte Token Anda" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#2845D6]" />
+                                <p class="text-[9px] text-slate-400 mt-1">Dapatkan token API Anda di dashboard Fonnte.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Instruksi Asisten CS AI (Prompt)</label>
+                            <textarea name="ai_cs_instruction" rows="4" placeholder="Contoh: Anda adalah asisten CS untuk Royal Syariah Residence. Jawab ramah dan berfokus pada promo free DP..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#2845D6]">${settings.ai_cs_instruction || ''}</textarea>
+                            <p class="text-[9px] text-slate-400 mt-1">Tuliskan instruksi asisten AI Anda melayani pelanggan.</p>
+                        </div>
+                        <div class="mt-4 bg-teal-50 border border-teal-200 rounded-xl p-4 flex gap-3 text-left">
+                            <i data-lucide="info" class="w-5 h-5 text-teal-600 shrink-0 mt-0.5"></i>
+                            <div>
+                                <p class="text-xs font-bold text-teal-800">Webhook Integration URL:</p>
+                                <p class="text-[10px] text-teal-700 mt-1">
+                                    Copy URL berikut dan tempelkan ke kolom <strong>Webhook</strong> pada device Anda di dashboard Fonnte:<br/>
+                                    <code class="bg-teal-100 px-2 py-1 rounded text-teal-900 font-mono select-all select-text inline-block mt-1 font-semibold">${window.location.origin}/api/whatsapp_webhook.php</code>
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="pt-4">

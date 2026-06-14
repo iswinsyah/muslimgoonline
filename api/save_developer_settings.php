@@ -15,6 +15,12 @@ $ai_creative_caption = $_POST['ai_creative_caption'] ?? null;
 $ai_creative_visual = $_POST['ai_creative_visual'] ?? null;
 $ai_creative_video = $_POST['ai_creative_video'] ?? null;
 $wa_number = $_POST['wa_number'] ?? null;
+if ($wa_number !== null) {
+    $wa_number = preg_replace('/\D/', '', $wa_number);
+    if (strpos($wa_number, '0') === 0) {
+        $wa_number = '62' . substr($wa_number, 1);
+    }
+}
 $fonnte_token = $_POST['fonnte_token'] ?? null;
 $ai_cs_instruction = $_POST['ai_cs_instruction'] ?? null;
 $logo_file = $_FILES['logo'] ?? null;
@@ -112,8 +118,8 @@ try {
 
     // If no specific AI field was sent, and it's a full form submission
     if (!$is_specific_update && $app_name !== null) {
-        $stmt = $pdo->prepare("UPDATE developers SET app_name = ?, notification_email = ?, logo_url = ?, maintenance_mode = ?, wa_number = ? WHERE id = ?");
-        $stmt->execute([$app_name, $notification_email, $logo_url, $maintenance_mode, $wa_number, $developer_id]);
+        $stmt = $pdo->prepare("UPDATE developers SET app_name = ?, notification_email = ?, logo_url = ?, maintenance_mode = ?, wa_number = ?, fonnte_token = ?, ai_cs_instruction = ? WHERE id = ?");
+        $stmt->execute([$app_name, $notification_email, $logo_url, $maintenance_mode, $wa_number, $fonnte_token, $ai_cs_instruction, $developer_id]);
     }
 
     echo json_encode(['message' => $message, 'new_logo_url' => $logo_url]);
