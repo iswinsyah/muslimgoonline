@@ -1,6 +1,6 @@
 <?php
 // api/seed_civic.php
-// Trigger redeploy: 2
+// Trigger redeploy: 3
 header("Content-Type: application/json");
 require_once 'db_connect_pdo.php';
 
@@ -10,11 +10,19 @@ try {
     $password_hash = password_hash($password_mentah, PASSWORD_DEFAULT);
     
     // Cek apakah username sudah digunakan
-    $check = $pdo->prepare("SELECT id FROM users WHERE username = ?");
+    $check = $pdo->prepare("SELECT id, role FROM users WHERE username = ?");
     $check->execute([$username]);
+    $existing = $check->fetch();
     
-    if ($check->fetch()) {
-        echo json_encode(["status" => "error", "message" => "Username 'civic' sudah digunakan."]);
+    if ($existing) {
+        // Jika sudah ada, update password dan pastikan role-nya Super Admin
+        $stmtUpdate = $pdo->prepare("UPDATE users SET password = ?, role = 'Super Admin', status = 'Active' WHERE id = ?");
+        $stmtUpdate->execute([$password_hash, $existing['id']]);
+        
+        echo json_encode([
+            "status" => "success",
+            "message" => "User 'civic' sudah ada. Password dan role berhasil diperbarui menjadi Super Admin!"
+        ]);
         exit;
     }
 
@@ -38,7 +46,7 @@ try {
     http_response_code(500);
     echo json_encode([
         "status" => "error",
-        "message" => "Gagal menambahkan user: " . $e->getMessage()
+        "message" => "Gagal: " . $e->getMessage()
     ]);
 }
 ?>
