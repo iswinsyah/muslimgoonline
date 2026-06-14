@@ -1,5 +1,5 @@
 // App Version: 1.0.1 - Triggering Deployment to crmprosyariah.online
-// App Version: 1.0.4 - Force Sync Menu Daftar Buyer
+// App Version: 1.0.5 - Force Sync Menu Gudang Token and Team Management
 import { ApiService } from './api.js';
 import { UI } from './ui.js';
 import { PipelineComponent } from './components/pipeline.js';
