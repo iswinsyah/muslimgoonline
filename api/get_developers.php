@@ -7,9 +7,9 @@ header("Access-Control-Allow-Methods: GET");
 require_once 'db_connect_pdo.php';
 
 try {
-    // Ambil semua developer yang statusnya aktif untuk ditampilkan di dropdown
-    $stmt = $pdo->query("SELECT id, nama_perusahaan FROM developers WHERE status_langganan = 'Active' ORDER BY nama_perusahaan ASC");
-    $developers = $stmt->fetchAll();
+    // Ambil semua developer untuk manajemen portfolio Super Admin
+    $stmt = $pdo->query("SELECT id, nama_perusahaan, status_langganan, wa_number, fonnte_token, created_at FROM developers ORDER BY id DESC");
+    $developers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode($developers);
 

@@ -14,7 +14,7 @@ $new_status = $data['status'] ?? null; // 'Active' or 'Rejected'
 $fonnte_token = $data['fonnte_token'] ?? null;
 $wa_number = $data['wa_number'] ?? null;
 
-if (!$developer_id || !in_array($new_status, ['Active', 'Rejected'])) {
+if (!$developer_id || !in_array($new_status, ['Active', 'Inactive', 'Pending', 'Rejected'])) {
     http_response_code(400);
     echo json_encode(['message' => 'Input tidak valid.']);
     exit;
@@ -45,7 +45,12 @@ try {
     $stmtDev->execute([$new_status, $fonnte_token, $wa_number, $developer_id]);
 
     // 2. Update status di tabel users untuk owner-nya
-    $user_status = ($new_status === 'Active') ? 'Active' : 'Rejected';
+    $user_status = 'Inactive';
+    if ($new_status === 'Active') {
+        $user_status = 'Active';
+    } elseif ($new_status === 'Rejected') {
+        $user_status = 'Rejected';
+    }
     $stmtUser = $pdo->prepare("UPDATE users SET status = ? WHERE developer_id = ? AND role = 'Developer'");
     $stmtUser->execute([$user_status, $developer_id]);
 
