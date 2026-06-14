@@ -127,10 +127,12 @@ export class ApiService {
 
     static async generateAIContent(prompt) {
         try {
+            const mgoUserJson = localStorage.getItem('mgo_user');
+            const developerId = mgoUserJson ? JSON.parse(mgoUserJson).developer_id : null;
             const response = await fetch(`${API_BASE_URL}/gemini.php`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: prompt })
+                body: JSON.stringify({ prompt: prompt, developer_id: developerId })
             });
             return await this.handleResponse(response);
         } catch (error) {

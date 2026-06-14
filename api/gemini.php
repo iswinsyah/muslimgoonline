@@ -7,6 +7,7 @@ header("Access-Control-Allow-Methods: POST");
 
 $data = json_decode(file_get_contents("php://input"), true);
 $prompt = $data['prompt'] ?? '';
+$developer_id = $data['developer_id'] ?? null;
 
 if (empty($prompt)) {
     http_response_code(400);
@@ -56,5 +57,41 @@ if ($httpCode !== 200) {
 
 $decoded = json_decode($response, true);
 $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? "Maaf, AI tidak memberikan respons yang dapat dibaca.";
+
+// Catat pemakaian token jika ada metadata dan developer_id
+$usage = $decoded['usageMetadata'] ?? null;
+if ($usage && $developer_id) {
+    try {
+        require_once 'db_connect_pdo.php';
+        $stmtLog = $pdo->prepare("INSERT INTO usage_logs (developer_id, feature, gemini_prompt_tokens, gemini_completion_tokens, gemini_total_tokens) VALUES (?, ?, ?, ?, ?)");
+        
+        $feature = 'AI Assistant';
+        if (stripos($prompt, 'Suhu Prospek') !== false) {
+            $feature = 'Lead Gestur Analyzer';
+        } elseif (stripos($prompt, 'keberatan') !== false || stripos($prompt, 'objection') !== false) {
+            $feature = 'Objection Generator';
+        } elseif (stripos($prompt, 'Persona') !== false) {
+            $feature = 'Buyer Persona';
+        } elseif (stripos($prompt, 'kalender konten') !== false || stripos($prompt, 'content calendar') !== false) {
+            $feature = 'Content Calendar';
+        } elseif (stripos($prompt, 'caption') !== false) {
+            $feature = 'Creative Suite - Caption';
+        } elseif (stripos($prompt, 'visual') !== false) {
+            $feature = 'Creative Suite - Visual';
+        } elseif (stripos($prompt, 'video') !== false || stripos($prompt, 'naskah') !== false) {
+            $feature = 'Creative Suite - Video';
+        }
+        
+        $stmtLog->execute([
+            $developer_id,
+            $feature,
+            $usage['promptTokenCount'] ?? 0,
+            $usage['candidatesTokenCount'] ?? 0,
+            $usage['totalTokenCount'] ?? 0
+        ]);
+    } catch (Exception $e) {
+        error_log("Failed to write usage log: " . $e->getMessage());
+    }
+}
 
 echo json_encode(["result" => $text]);

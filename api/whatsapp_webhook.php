@@ -61,16 +61,24 @@ Pertanyaan Calon Pembeli: \"$message\"
 Berikan jawaban yang singkat, padat, persuasif, dan sangat ramah. Jangan gunakan format markdown yang rumit (seperti bold berlebih atau tabel) karena pesan ini dikirim via WhatsApp.";
 
     // 3. Panggil API Gemini (Re-use logic dari gemini.php)
-    $ai_answer = callGeminiAI($prompt);
+    $ai_answer = callGeminiAI($prompt, $tenant['id']);
 
     // 4. Balas ke WhatsApp menggunakan API Fonnte
     sendToFonnte($sender, $ai_answer, $tenant['fonnte_token']);
+
+    // Catat pengiriman WhatsApp ke log
+    try {
+        $stmtLogWA = $pdo->prepare("INSERT INTO usage_logs (developer_id, feature, whatsapp_messages_sent) VALUES (?, 'CS Chatbot WA Send', 1)");
+        $stmtLogWA->execute([$tenant['id']]);
+    } catch (Exception $e) {
+        error_log("Failed to log WA message sent: " . $e->getMessage());
+    }
 
 } catch (Exception $e) {
     error_log("WA Webhook Error: " . $e->getMessage());
 }
 
-function callGeminiAI($prompt) {
+function callGeminiAI($prompt, $developer_id) {
     if (!defined('GEMINI_GAS_URL') || empty(GEMINI_GAS_URL)) {
         return "Maaf, saat ini layanan asisten otomatis kami sedang dalam pemeliharaan. Mohon tinggalkan pesan, admin kami akan segera menghubungi Anda.";
     }
@@ -95,6 +103,24 @@ function callGeminiAI($prompt) {
     }
     
     $decoded = json_decode($response, true);
+    
+    // Catat pemakaian token Gemini jika ada metadata
+    $usage = $decoded['usageMetadata'] ?? null;
+    if ($usage && $developer_id) {
+        try {
+            global $pdo;
+            $stmtLog = $pdo->prepare("INSERT INTO usage_logs (developer_id, feature, gemini_prompt_tokens, gemini_completion_tokens, gemini_total_tokens) VALUES (?, 'CS Chatbot AI Processing', ?, ?, ?)");
+            $stmtLog->execute([
+                $developer_id,
+                $usage['promptTokenCount'] ?? 0,
+                $usage['candidatesTokenCount'] ?? 0,
+                $usage['totalTokenCount'] ?? 0
+            ]);
+        } catch (Exception $e) {
+            error_log("Failed to log CS Chatbot Gemini usage: " . $e->getMessage());
+        }
+    }
+    
     return $decoded['candidates'][0]['content']['parts'][0]['text'] ?? "Maaf, saat ini layanan asisten otomatis kami sedang dalam pemeliharaan. Mohon tinggalkan pesan, admin kami akan segera menghubungi Anda.";
 }
 
