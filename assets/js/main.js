@@ -429,8 +429,8 @@ if (!loggedInUser) {
         const categoryOrder = [
             'OPERASIONAL HARIAN',
             'STRATEGI & KONTEN',
-            'Manajemen Lanjutan',
-            'Administrasi Sistem'
+            'DEVELOPER',
+            'SUPER ADMIN'
         ];
 
         // Kelompokkan menu berdasarkan kategori
@@ -492,32 +492,32 @@ if (!loggedInUser) {
 
     function assignCategoriesToMenus(menus) {
         const categoryMap = {
-            // Operasional Harian
+            // OPERASIONAL HARIAN
             'pipeline': 'OPERASIONAL HARIAN',
-            'buyer-list': 'OPERASIONAL HARIAN',
             'ai-lead': 'OPERASIONAL HARIAN',
             'ai-objection': 'OPERASIONAL HARIAN',
             'tasks': 'OPERASIONAL HARIAN',
             'calendar': 'OPERASIONAL HARIAN',
             'reporting': 'OPERASIONAL HARIAN',
 
-            // Strategi & Konten
+            // STRATEGI & KONTEN
             'persona': 'STRATEGI & KONTEN',
             'ai-content-calendar': 'STRATEGI & KONTEN',
             'ai-creative': 'STRATEGI & KONTEN',
 
-            // Manajemen Lanjutan
-            'ai-engine': 'Manajemen Lanjutan',
-            'client-management': 'Manajemen Lanjutan',
-            'team-management': 'Manajemen Lanjutan',
-            'validation': 'Manajemen Lanjutan',
-            'portfolio': 'Manajemen Lanjutan',
+            // DEVELOPER
+            'team-management': 'DEVELOPER',
+            'settings': 'DEVELOPER',
+            'buyer-list': 'DEVELOPER',
 
-            // Administrasi Sistem
-            'menu-management': 'Administrasi Sistem',
-            'impersonation': 'Administrasi Sistem',
-            'token-pool': 'Administrasi Sistem',
-            'settings': 'Administrasi Sistem',
+            // SUPER ADMIN
+            'portfolio': 'SUPER ADMIN',
+            'impersonation': 'SUPER ADMIN',
+            'token-pool': 'SUPER ADMIN',
+            'menu-management': 'SUPER ADMIN',
+            'client-management': 'SUPER ADMIN',
+            'ai-engine': 'SUPER ADMIN',
+            'validation': 'SUPER ADMIN',
         };
         return menus.map(menu => {
             menu.category = categoryMap[menu.menu_id] || 'Uncategorized';
@@ -528,25 +528,32 @@ if (!loggedInUser) {
     // Fungsi untuk menyediakan menu default jika API gagal
     function getDefaultMenus(role) {
         const allMenus = [
+            // OPERASIONAL HARIAN
             { menu_id: 'pipeline', label: 'Lead & Pipeline', icon: 'trending-up', roles: ['All'] },
-            { menu_id: 'buyer-list', label: 'Daftar Buyer', icon: 'users', roles: ['Developer', 'Super Admin'] },
             { menu_id: 'ai-lead', label: 'Lead Analyzer', icon: 'brain-circuit', roles: ['Developer', 'Admin CS', 'Super Admin'] },
             { menu_id: 'ai-objection', label: 'Objection Gen', icon: 'shield-alert', roles: ['Developer', 'Admin CS', 'Super Admin'] },
             { menu_id: 'tasks', label: 'Task Manager', icon: 'check-square', roles: ['All'] },
             { menu_id: 'calendar', label: 'Calendar', icon: 'calendar-days', roles: ['All'] },
-            { menu_id: 'reporting', label: 'Weekly Report', icon: 'bar-chart-2', roles: ['Developer', 'Super Admin'] },
-            { menu_id: 'persona', label: 'AI Persona Insight', icon: 'user-check', roles: ['Developer', 'Super Admin'] },
-            { menu_id: 'ai-content-calendar', label: 'AI Content Calendar', icon: 'calendar-plus', roles: ['Developer', 'Super Admin'] },
-            { menu_id: 'ai-creative', label: 'Creative Suite', icon: 'sparkles', roles: ['Developer', 'Super Admin'] },
-            { menu_id: 'ai-engine', label: 'AI Engine Config', icon: 'database', roles: ['Developer', 'Super Admin'] },
-            { menu_id: 'client-management', label: 'Client Management', icon: 'users', roles: ['Super Admin'] },
+            { menu_id: 'reporting', label: 'Weekly Report', icon: 'bar-chart-2', roles: ['Developer', 'Admin CS', 'Super Admin'] },
+
+            // STRATEGI & KONTEN
+            { menu_id: 'persona', label: 'Buyer Persona', icon: 'user-check', roles: ['Developer', 'Admin CS', 'Super Admin'] },
+            { menu_id: 'ai-content-calendar', label: 'AI Content Calendar', icon: 'calendar-plus', roles: ['Developer', 'Admin CS', 'Super Admin'] },
+            { menu_id: 'ai-creative', label: 'Creative Suite', icon: 'sparkles', roles: ['All'] },
+
+            // DEVELOPER
             { menu_id: 'team-management', label: 'Team Management', icon: 'user-plus', roles: ['Developer', 'Super Admin'] },
-            { menu_id: 'validation', label: 'Validation', icon: 'check-circle', roles: ['Super Admin'] },
-            { menu_id: 'portfolio', label: 'Portfolio', icon: 'briefcase', roles: ['Super Admin'] },
-            { menu_id: 'menu-management', label: 'Menu Management', icon: 'list', roles: ['Super Admin'] },
-            { menu_id: 'impersonation', label: 'Impersonation', icon: 'user-cog', roles: ['Super Admin'] },
+            { menu_id: 'settings', label: 'Setting', icon: 'settings', roles: ['Developer', 'Super Admin'] },
+            { menu_id: 'buyer-list', label: 'Daftar Buyer', icon: 'users', roles: ['Developer', 'Super Admin'] },
+
+            // SUPER ADMIN
+            { menu_id: 'portfolio', label: 'Global Portofolio', icon: 'briefcase', roles: ['Super Admin', 'Developer'] },
+            { menu_id: 'impersonation', label: 'Mode Penyamaran', icon: 'user-cog', roles: ['Super Admin'] },
             { menu_id: 'token-pool', label: 'Gudang Token', icon: 'key', roles: ['Super Admin'] },
-            { menu_id: 'settings', label: 'Settings', icon: 'settings', roles: ['Developer', 'Super Admin'] },
+            { menu_id: 'menu-management', label: 'Menu Management', icon: 'list', roles: ['Super Admin'] },
+            { menu_id: 'client-management', label: 'Client Management', icon: 'building-2', roles: ['Super Admin'] },
+            { menu_id: 'ai-engine', label: 'AI Engine Config', icon: 'database', roles: ['Super Admin'] },
+            { menu_id: 'validation', label: 'Validasi Pendaftar', icon: 'check-circle', roles: ['Super Admin'] }
         ];
         return allMenus.filter(menu => menu.roles.includes('All') || menu.roles.includes(role));
     }
