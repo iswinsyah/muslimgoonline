@@ -54,8 +54,7 @@
                 <div class="flex items-center justify-center gap-3">
                     <img src="https://assets.about.me/background/users/d/i/g/digitalmarketingjakarta_1464927354_96.jpg" alt="Muslim Go Online" class="w-8 h-8 rounded-full">
                     <div>
-                        <p class="text-sm font-black text-[#F8843F] tracking-tighter italic">CRM PRO</p>
-                        <p class="text-[9px] text-blue-300 -mt-1">Muslim Go Online</p>
+                        <p class="text-sm font-black text-[#F8843F] tracking-tighter italic">Muslim Go Online</p>
                     </div>
                 </div>
             </div>
