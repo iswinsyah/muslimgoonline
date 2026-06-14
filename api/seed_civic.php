@@ -1,0 +1,43 @@
+<?php
+// api/seed_civic.php
+header("Content-Type: application/json");
+require_once 'db_connect_pdo.php';
+
+try {
+    $username = 'civic';
+    $password_mentah = '12345678';
+    $password_hash = password_hash($password_mentah, PASSWORD_DEFAULT);
+    
+    // Cek apakah username sudah digunakan
+    $check = $pdo->prepare("SELECT id FROM users WHERE username = ?");
+    $check->execute([$username]);
+    
+    if ($check->fetch()) {
+        echo json_encode(["status" => "error", "message" => "Username 'civic' sudah digunakan."]);
+        exit;
+    }
+
+    $stmt = $pdo->prepare("INSERT INTO users (nama_user, role, username, password, email, status, is_first_login) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([
+        'Civic Admin',
+        'Super Admin',
+        $username,
+        $password_hash,
+        'civic@crmprosyariah.online',
+        'Active',
+        0
+    ]);
+
+    echo json_encode([
+        "status" => "success",
+        "message" => "Super Admin 'civic' berhasil ditambahkan!"
+    ]);
+
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode([
+        "status" => "error",
+        "message" => "Gagal menambahkan user: " . $e->getMessage()
+    ]);
+}
+?>
