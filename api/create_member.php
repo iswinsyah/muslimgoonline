@@ -22,13 +22,15 @@ try {
     }
 
     $hashed_password = password_hash($data['password'], PASSWORD_DEFAULT);
+    $no_whatsapp = $data['no_whatsapp'] ?? null;
     
-    $stmt = $pdo->prepare("INSERT INTO users (developer_id, nama_user, username, password, role, status, is_first_login) VALUES (?, ?, ?, ?, ?, 'Active', 0)");
+    $stmt = $pdo->prepare("INSERT INTO users (developer_id, nama_user, username, password, no_whatsapp, role, status, is_first_login) VALUES (?, ?, ?, ?, ?, ?, 'Active', 0)");
     $stmt->execute([
         $data['developer_id'],
         $data['nama_user'],
         $data['username'],
         $hashed_password,
+        $no_whatsapp,
         $data['role']
     ]);
     

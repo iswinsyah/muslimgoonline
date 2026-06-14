@@ -12,7 +12,7 @@ if (!$developer_id) {
 
 try {
     // Isolasi data: Hanya ambil tim milik developer yang sedang login
-    $stmt = $pdo->prepare("SELECT id, nama_user, username, role, status FROM users WHERE developer_id = ? AND role IN ('Admin CS', 'Agent Freelance') ORDER BY id DESC");
+    $stmt = $pdo->prepare("SELECT id, nama_user, username, no_whatsapp, role, status FROM users WHERE developer_id = ? AND role IN ('Admin CS', 'Agent Freelance') ORDER BY id DESC");
     $stmt->execute([$developer_id]);
     $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
     

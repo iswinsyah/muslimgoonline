@@ -28,6 +28,7 @@ export class TeamManagementComponent {
                                 <tr>
                                     <th class="px-6 py-5">Nama Anggota</th>
                                     <th class="px-6 py-5">Username</th>
+                                    <th class="px-6 py-5">WhatsApp</th>
                                     <th class="px-6 py-5">Role</th>
                                     <th class="px-6 py-5 text-center">Status</th>
                                     <th class="px-6 py-5 text-right">Aksi</th>
@@ -35,7 +36,7 @@ export class TeamManagementComponent {
                             </thead>
                             <tbody id="team-list-body" class="text-xs md:text-sm font-bold">
                                 <tr class="border-b last:border-0 hover:bg-slate-50 transition-colors">
-                                    <td colspan="5" class="px-6 py-10 text-center text-slate-400 italic font-medium">Memuat data tim...</td>
+                                    <td colspan="6" class="px-6 py-10 text-center text-slate-400 italic font-medium">Memuat data tim...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -70,6 +71,10 @@ export class TeamManagementComponent {
                             </div>
                         </div>
                         <div>
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nomor WhatsApp</label>
+                            <input required name="no_whatsapp" type="text" placeholder="Contoh: 08123456789" class="w-full mt-1 bg-slate-50 border p-3 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#2845D6]" />
+                        </div>
+                        <div>
                             <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Password Default</label>
                             <input required name="password" type="password" class="w-full mt-1 bg-slate-50 border p-3 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#2845D6]" />
                         </div>
@@ -92,7 +97,7 @@ export class TeamManagementComponent {
             const members = await ApiService.get(`get_team.php?developer_id=${this.state.currentUser.developer_id}`);
             
             if (members.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-slate-400 italic">Belum ada tim. Silakan tambah anggota.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-slate-400 italic">Belum ada tim. Silakan tambah anggota.</td></tr>`;
                 return;
             }
 
@@ -100,6 +105,7 @@ export class TeamManagementComponent {
                 <tr class="border-b last:border-0 hover:bg-slate-50 transition-colors">
                     <td class="px-6 py-4 text-slate-800">${m.nama_user}</td>
                     <td class="px-6 py-4 text-slate-500 font-mono">${m.username}</td>
+                    <td class="px-6 py-4 text-slate-600 font-medium">${m.no_whatsapp || '-'}</td>
                     <td class="px-6 py-4">
                         <span class="px-2 py-1 bg-blue-50 text-blue-600 rounded text-[9px] font-black uppercase">${m.role}</span>
                     </td>
@@ -114,7 +120,7 @@ export class TeamManagementComponent {
             `).join('');
 
         } catch (error) {
-            tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-red-400">Gagal memuat data tim.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-10 text-center text-red-400">Gagal memuat data tim.</td></tr>`;
         }
         if (window.lucide) window.lucide.createIcons();
     }
