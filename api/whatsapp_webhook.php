@@ -54,18 +54,28 @@ Berikan jawaban yang singkat, padat, persuasif, dan sangat ramah. Jangan gunakan
 }
 
 function callGeminiAI($prompt) {
-    // Gunakan model yang sudah disetting di gemini.php
-    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" . GEMINI_API_KEY;
-    $payload = ["contents" => [["parts" => [["text" => $prompt]]]]];
+    if (!defined('GEMINI_GAS_URL') || empty(GEMINI_GAS_URL)) {
+        return "Maaf, saat ini layanan asisten otomatis kami sedang dalam pemeliharaan. Mohon tinggalkan pesan, admin kami akan segera menghubungi Anda.";
+    }
+
+    $payload = ["prompt" => $prompt];
     
-    $ch = curl_init($url);
+    $ch = curl_init(GEMINI_GAS_URL);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Apps Script redirect support
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
     
     $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    
+    if ($httpCode !== 200) {
+        return "Maaf, saat ini layanan asisten otomatis kami sedang dalam pemeliharaan. Mohon tinggalkan pesan, admin kami akan segera menghubungi Anda.";
+    }
     
     $decoded = json_decode($response, true);
     return $decoded['candidates'][0]['content']['parts'][0]['text'] ?? "Maaf, saat ini layanan asisten otomatis kami sedang dalam pemeliharaan. Mohon tinggalkan pesan, admin kami akan segera menghubungi Anda.";

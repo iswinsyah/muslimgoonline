@@ -14,31 +14,23 @@ if (empty($prompt)) {
     exit;
 }
 
-if (!defined('GEMINI_API_KEY') || empty(GEMINI_API_KEY) || GEMINI_API_KEY === 'PASTE_API_KEY_DISINI') {
+if (!defined('GEMINI_GAS_URL') || empty(GEMINI_GAS_URL)) {
     http_response_code(500);
-    echo json_encode(["error" => "API Key belum disetting di server."]);
+    echo json_encode(["error" => "GAS URL belum disetting di server."]);
     exit;
 }
 
-// Menggunakan model gemini-2.5-flash sesuai permintaan
-$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" . GEMINI_API_KEY;
-
 $payload = [
-    "contents" => [
-        [
-            "parts" => [
-                ["text" => $prompt]
-            ]
-        ]
-    ]
+    "prompt" => $prompt
 ];
 
-$ch = curl_init($url);
+$ch = curl_init(GEMINI_GAS_URL);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10); // Waktu tunggu koneksi (detik)
 curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Total waktu eksekusi (detik)
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Apps Script redirect support
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "Content-Type: application/json"
 ]);
@@ -55,10 +47,9 @@ if ($curlError) {
 }
 
 if ($httpCode !== 200) {
-    // Jangan set http_response_code ke 404 agar frontend tidak bingung, kirim 500 dengan pesan jelas
     http_response_code(500); 
     $errorDetails = json_decode($response, true);
-    $specificMessage = $errorDetails['error']['message'] ?? "Google API Error ($httpCode): " . $response;
+    $specificMessage = $errorDetails['error']['message'] ?? "GAS API Error ($httpCode): " . $response;
     echo json_encode(["error" => $specificMessage]);
     exit;
 }

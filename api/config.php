@@ -4,6 +4,7 @@
 
 // Masukkan API Key Google Gemini Anda di sini
 define('GEMINI_API_KEY', 'AIzaSyDkaj2FgEjXQC_7568xz5iTQ9KUbrDKFvw');
+define('GEMINI_GAS_URL', 'https://script.google.com/macros/s/AKfycbyCq_jusyiC-LBWMUCY0XY2IdD-pvvPpDRArPYWVrVRcT6gJZ4L_DGMJfVwYVswzY_7/exec');
 
 // Konfigurasi Notifikasi Super Admin
 define('SUPER_ADMIN_WA', '0895808626677');

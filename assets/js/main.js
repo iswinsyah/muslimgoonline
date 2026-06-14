@@ -68,7 +68,7 @@ if (!loggedInUser) {
             // 2. Ambil menu dinamis dari API
             let fetchedMenus = [];
             try {
-                fetchedMenus = await ApiService.get('get_menus.php');
+                fetchedMenus = await ApiService.get(`get_menus.php?v=${Date.now()}`);
                 
                 // Normalisasi data dari database (allowed_roles string -> roles Array)
                 fetchedMenus = Array.isArray(fetchedMenus) ? fetchedMenus : (fetchedMenus.data || []);
