@@ -24,7 +24,11 @@ async function initializeStandardSignup() {
     
     // Sembunyikan pilihan "Pilih Perusahaan" karena Developer membuat perusahaan baru
     const existingDevContainer = document.getElementById('existing-developer-container');
-    if(existingDevContainer) existingDevContainer.classList.add('hidden');
+    if (existingDevContainer) {
+        existingDevContainer.classList.add('hidden');
+        const devSelect = existingDevContainer.querySelector('select');
+        if (devSelect) devSelect.required = false;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
