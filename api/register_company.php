@@ -80,19 +80,39 @@ try {
     $pdo->commit();
 
     // --- Kirim Notifikasi WhatsApp ke Super Admin ---
-    if (defined('FONNTE_TOKEN_ADMIN') && FONNTE_TOKEN_ADMIN !== 'PASTE_TOKEN_FONNTE_ADMIN_DISINI') {
-        $msg_wa = "Ada pendaftar baru di CRM ProSyariah dengan nama " . $_POST['nama_user'] . " nomor whatsapp " . $_POST['kontak_perusahaan'] . "}";
+    $admin_token = (defined('FONNTE_TOKEN_ADMIN') && FONNTE_TOKEN_ADMIN !== 'PASTE_TOKEN_FONNTE_ADMIN_DISINI') ? FONNTE_TOKEN_ADMIN : null;
+    
+    // Fallback: Cari token apa saja yang aktif di database jika token admin utama belum diisi
+    if (empty($admin_token)) {
+        $stmtFallback = $pdo->prepare("SELECT token FROM fonnte_tokens_pool WHERE token IS NOT NULL AND token != '' LIMIT 1");
+        $stmtFallback->execute();
+        $fallback = $stmtFallback->fetch();
+        if ($fallback) {
+            $admin_token = $fallback['token'];
+        } else {
+            $stmtDevFallback = $pdo->prepare("SELECT fonnte_token FROM developers WHERE fonnte_token IS NOT NULL AND fonnte_token != '' LIMIT 1");
+            $stmtDevFallback->execute();
+            $devFallback = $stmtDevFallback->fetch();
+            if ($devFallback) {
+                $admin_token = $devFallback['fonnte_token'];
+            }
+        }
+    }
+
+    if (!empty($admin_token)) {
+        $msg_wa = "Ada Tenant Baru mendaftar silahkan dichek";
+        $target_wa = defined('SUPER_ADMIN_WA') ? SUPER_ADMIN_WA : '0895808626677';
         
         $curl = curl_init();
         curl_setopt_array($curl, array(
             CURLOPT_URL => 'https://api.fonnte.com/send',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POSTFIELDS => array(
-                'target' => SUPER_ADMIN_WA,
+                'target' => $target_wa,
                 'message' => $msg_wa,
             ),
             CURLOPT_HTTPHEADER => array(
-                "Authorization: " . FONNTE_TOKEN_ADMIN
+                "Authorization: " . $admin_token
             ),
         ));
         curl_exec($curl);
