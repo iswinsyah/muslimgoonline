@@ -81,31 +81,31 @@ try {
 
         // SUPER ADMIN
         [
-            'menu_id' => 'portfolio', 'label' => 'Global Portofolio', 'icon' => 'globe',
-            'allowed_roles' => json_encode(['Super Admin', 'Developer']), 'sort_order' => 130
-        ],
-        [
-            'menu_id' => 'impersonation', 'label' => 'Mode Penyamaran', 'icon' => 'user-cog',
-            'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 140
+            'menu_id' => 'validation', 'label' => 'Validasi Pendaftar', 'icon' => 'shield-check',
+            'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 130
         ],
         [
             'menu_id' => 'token-pool', 'label' => 'Gudang Token', 'icon' => 'key',
-            'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 150
-        ],
-        [
-            'menu_id' => 'menu-management', 'label' => 'Menu Management', 'icon' => 'list-checks',
-            'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 160
+            'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 140
         ],
         [
             'menu_id' => 'client-management', 'label' => 'Client Management', 'icon' => 'building-2',
+            'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 150
+        ],
+        [
+            'menu_id' => 'impersonation', 'label' => 'Mode Penyamaran', 'icon' => 'user-cog',
+            'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 160
+        ],
+        [
+            'menu_id' => 'menu-management', 'label' => 'Menu Management', 'icon' => 'list-checks',
             'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 170
         ],
         [
-            'menu_id' => 'ai-engine', 'label' => 'AI Engine Config', 'icon' => 'database',
-            'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 180
+            'menu_id' => 'portfolio', 'label' => 'Global Portofolio', 'icon' => 'globe',
+            'allowed_roles' => json_encode(['Super Admin', 'Developer']), 'sort_order' => 180
         ],
         [
-            'menu_id' => 'validation', 'label' => 'Validasi Pendaftar', 'icon' => 'shield-check',
+            'menu_id' => 'ai-engine', 'label' => 'AI Engine Config', 'icon' => 'database',
             'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 190
         ]
     ];

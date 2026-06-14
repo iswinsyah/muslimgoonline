@@ -547,13 +547,13 @@ if (!loggedInUser) {
             { menu_id: 'buyer-list', label: 'Daftar Buyer', icon: 'users', roles: ['Developer', 'Super Admin'] },
 
             // SUPER ADMIN
-            { menu_id: 'portfolio', label: 'Global Portofolio', icon: 'briefcase', roles: ['Super Admin', 'Developer'] },
-            { menu_id: 'impersonation', label: 'Mode Penyamaran', icon: 'user-cog', roles: ['Super Admin'] },
+            { menu_id: 'validation', label: 'Validasi Pendaftar', icon: 'check-circle', roles: ['Super Admin'] },
             { menu_id: 'token-pool', label: 'Gudang Token', icon: 'key', roles: ['Super Admin'] },
-            { menu_id: 'menu-management', label: 'Menu Management', icon: 'list', roles: ['Super Admin'] },
             { menu_id: 'client-management', label: 'Client Management', icon: 'building-2', roles: ['Super Admin'] },
-            { menu_id: 'ai-engine', label: 'AI Engine Config', icon: 'database', roles: ['Super Admin'] },
-            { menu_id: 'validation', label: 'Validasi Pendaftar', icon: 'check-circle', roles: ['Super Admin'] }
+            { menu_id: 'impersonation', label: 'Mode Penyamaran', icon: 'user-cog', roles: ['Super Admin'] },
+            { menu_id: 'menu-management', label: 'Menu Management', icon: 'list', roles: ['Super Admin'] },
+            { menu_id: 'portfolio', label: 'Global Portofolio', icon: 'briefcase', roles: ['Super Admin', 'Developer'] },
+            { menu_id: 'ai-engine', label: 'AI Engine Config', icon: 'database', roles: ['Super Admin'] }
         ];
         return allMenus.filter(menu => menu.roles.includes('All') || menu.roles.includes(role));
     }
