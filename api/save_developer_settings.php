@@ -23,6 +23,8 @@ if ($wa_number !== null) {
 }
 $fonnte_token = $_POST['fonnte_token'] ?? null;
 $ai_cs_instruction = $_POST['ai_cs_instruction'] ?? null;
+$theme_color = $_POST['theme_color'] ?? null;
+$sidebar_color = $_POST['sidebar_color'] ?? null;
 $logo_file = $_FILES['logo'] ?? null;
 
 if (!$developer_id) {
@@ -118,8 +120,8 @@ try {
 
     // If no specific AI field was sent, and it's a full form submission
     if (!$is_specific_update && $app_name !== null) {
-        $stmt = $pdo->prepare("UPDATE developers SET app_name = ?, notification_email = ?, logo_url = ?, maintenance_mode = ?, wa_number = ?, fonnte_token = ?, ai_cs_instruction = ? WHERE id = ?");
-        $stmt->execute([$app_name, $notification_email, $logo_url, $maintenance_mode, $wa_number, $fonnte_token, $ai_cs_instruction, $developer_id]);
+        $stmt = $pdo->prepare("UPDATE developers SET app_name = ?, notification_email = ?, logo_url = ?, maintenance_mode = ?, wa_number = ?, fonnte_token = ?, ai_cs_instruction = ?, theme_color = ?, sidebar_color = ? WHERE id = ?");
+        $stmt->execute([$app_name, $notification_email, $logo_url, $maintenance_mode, $wa_number, $fonnte_token, $ai_cs_instruction, $theme_color, $sidebar_color, $developer_id]);
     }
 
     echo json_encode(['message' => $message, 'new_logo_url' => $logo_url]);

@@ -53,6 +53,22 @@ export class SettingsComponent {
                                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Email Notifikasi Laporan</label>
                                     <input type="email" name="notification_email" value="${settings.notification_email || ''}" placeholder="email@perusahaan.com" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#2845D6]" />
                                 </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Warna Utama Aplikasi</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" name="theme_color" value="${settings.theme_color || '#2845D6'}" class="w-10 h-10 border border-slate-200 rounded-xl p-0.5 cursor-pointer bg-white" />
+                                            <input type="text" id="theme_color_text" value="${settings.theme_color || '#2845D6'}" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none font-mono" placeholder="#2845D6" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Warna Sidebar</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" name="sidebar_color" value="${settings.sidebar_color || '#1e3a8a'}" class="w-10 h-10 border border-slate-200 rounded-xl p-0.5 cursor-pointer bg-white" />
+                                            <input type="text" id="sidebar_color_text" value="${settings.sidebar_color || '#1e3a8a'}" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none font-mono" placeholder="#1e3a8a" />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -129,6 +145,29 @@ export class SettingsComponent {
         const logoInput = this.container.querySelector('#logo-input');
         const logoPreview = this.container.querySelector('#logo-preview');
         const logoPlaceholder = this.container.querySelector('#logo-placeholder');
+
+        const themeColorPicker = form.querySelector('input[name="theme_color"]');
+        const themeColorText = form.querySelector('#theme_color_text');
+        const sidebarColorPicker = form.querySelector('input[name="sidebar_color"]');
+        const sidebarColorText = form.querySelector('#sidebar_color_text');
+
+        if (themeColorPicker && themeColorText) {
+            themeColorPicker.addEventListener('input', (e) => themeColorText.value = e.target.value.toUpperCase());
+            themeColorText.addEventListener('input', (e) => {
+                if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                    themeColorPicker.value = e.target.value;
+                }
+            });
+        }
+
+        if (sidebarColorPicker && sidebarColorText) {
+            sidebarColorPicker.addEventListener('input', (e) => sidebarColorText.value = e.target.value.toUpperCase());
+            sidebarColorText.addEventListener('input', (e) => {
+                if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                    sidebarColorPicker.value = e.target.value;
+                }
+            });
+        }
 
         // Preview Logo saat dipilih
         logoInput.addEventListener('change', (e) => {

@@ -161,7 +161,7 @@ if (!loggedInUser) {
     function applyBranding() {
         if (!state.developerSettings) return;
         
-        const { app_name, logo_url, status_langganan } = state.developerSettings;
+        const { app_name, logo_url, status_langganan, theme_color, sidebar_color } = state.developerSettings;
 
         // Branding Sidebar
         const sidebarLogo = document.getElementById('sidebar-logo');
@@ -170,6 +170,34 @@ if (!loggedInUser) {
 
         if (logo_url) { sidebarLogo.src = logo_url; sidebarLogo.classList.remove('hidden'); }
         if (app_name) { sidebarTitle.innerText = app_name; sidebarSubtitle.classList.add('hidden'); }
+
+        // Tema Warna Dinamis (White-Labeling)
+        if (theme_color || sidebar_color) {
+            let styleTag = document.getElementById('tenant-theme-override');
+            if (!styleTag) {
+                styleTag = document.createElement('style');
+                styleTag.id = 'tenant-theme-override';
+                document.head.appendChild(styleTag);
+            }
+            const primary = theme_color || '#2845D6';
+            const sidebar = sidebar_color || '#1e3a8a';
+            styleTag.innerHTML = `
+                :root {
+                    --primary-color: ${primary};
+                    --sidebar-bg: ${sidebar};
+                }
+                .bg-\\[\\#2845D6\\] { background-color: var(--primary-color) !important; }
+                .text-\\[\\#2845D6\\] { color: var(--primary-color) !important; }
+                .border-\\[\\#2845D6\\] { border-color: var(--primary-color) !important; }
+                .focus\\:ring-\\[\\#2845D6\\]:focus { --tw-ring-color: var(--primary-color) !important; }
+                .bg-\\[\\#1e3a8a\\] { background-color: var(--sidebar-bg) !important; }
+                .border-blue-900 { border-color: rgba(255, 255, 255, 0.1) !important; }
+                .bg-blue-900\\/40 { background-color: rgba(255, 255, 255, 0.05) !important; }
+                .hover\\:bg-blue-700:hover { background-color: var(--primary-color) !important; filter: brightness(90%) !important; }
+                .hover\\:bg-blue-800\\/50:hover { background-color: rgba(255, 255, 255, 0.1) !important; }
+                .bg-blue-800\\/50 { background-color: rgba(255, 255, 255, 0.05) !important; }
+            `;
+        }
 
         // Cek Validasi Pembayaran (Hanya untuk non-Super Admin)
         if (state.currentRole !== 'Super Admin' && status_langganan === 'Pending') {
