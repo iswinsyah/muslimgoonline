@@ -22,18 +22,25 @@ if (!defined('GEMINI_GAS_URL') || empty(GEMINI_GAS_URL)) {
     exit;
 }
 
+$apiKey = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : '';
+$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
+
 $payload = [
-    "prompt" => $prompt,
-    "key" => defined('GEMINI_API_KEY') ? GEMINI_API_KEY : ''
+    "contents" => [
+        [
+            "parts" => [
+                ["text" => $prompt]
+            ]
+        ]
+    ]
 ];
 
-$ch = curl_init(GEMINI_GAS_URL);
+$ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10); // Waktu tunggu koneksi (detik)
 curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Total waktu eksekusi (detik)
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Apps Script redirect support
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "Content-Type: application/json"
 ]);
@@ -49,15 +56,15 @@ if ($curlError) {
     exit;
 }
 
+$decoded = json_decode($response, true);
+
 if ($httpCode !== 200) {
     http_response_code(500); 
-    $errorDetails = json_decode($response, true);
-    $specificMessage = $errorDetails['error']['message'] ?? "GAS API Error ($httpCode): " . $response;
+    $specificMessage = $decoded['error']['message'] ?? "Gemini API Error ($httpCode): " . $response;
     echo json_encode(["error" => $specificMessage]);
     exit;
 }
 
-$decoded = json_decode($response, true);
 $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? "Maaf, AI tidak memberikan respons yang dapat dibaca.";
 
 // Catat pemakaian token jika ada metadata dan developer_id

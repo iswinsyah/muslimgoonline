@@ -88,20 +88,26 @@ Berikan jawaban yang singkat, padat, persuasif, dan sangat ramah. Jangan gunakan
 }
 
 function callGeminiAI($prompt, $developer_id) {
-    if (!defined('GEMINI_GAS_URL') || empty(GEMINI_GAS_URL)) {
+    $apiKey = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : '';
+    if (empty($apiKey)) {
         return "Maaf, saat ini layanan asisten otomatis kami sedang dalam pemeliharaan. Mohon tinggalkan pesan, admin kami akan segera menghubungi Anda.";
     }
 
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
     $payload = [
-        "prompt" => $prompt,
-        "key" => defined('GEMINI_API_KEY') ? GEMINI_API_KEY : ''
+        "contents" => [
+            [
+                "parts" => [
+                    ["text" => $prompt]
+                ]
+            ]
+        ]
     ];
     
-    $ch = curl_init(GEMINI_GAS_URL);
+    $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Apps Script redirect support
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/json"]);
@@ -111,7 +117,7 @@ function callGeminiAI($prompt, $developer_id) {
     $err = curl_error($ch);
     curl_close($ch);
     
-    if ($httpCode !== 200) {
+    if ($httpCode !== 200 || $err) {
         file_put_contents('webhook_log.txt', date('Y-m-d H:i:s') . " | Gemini API call failed -> HTTP: $httpCode, Error: $err, Response: $response\n", FILE_APPEND);
         return "Maaf, saat ini layanan asisten otomatis kami sedang dalam pemeliharaan. Mohon tinggalkan pesan, admin kami akan segera menghubungi Anda.";
     }
