@@ -16,7 +16,30 @@ if (!$developer_id) {
 }
 
 try {
-    // Kosongkan token & nomor WA di database
+    // 1. Ambil token device lama untuk proses disconnect di Fonnte
+    $stmtGet = $pdo->prepare("SELECT fonnte_token FROM developers WHERE id = ?");
+    $stmtGet->execute([$developer_id]);
+    $dev = $stmtGet->fetch(PDO::FETCH_ASSOC);
+    $device_token = $dev['fonnte_token'] ?? null;
+
+    if (!empty($device_token)) {
+        // Panggil API Fonnte untuk disconnect (logout) sesi WA
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://api.fonnte.com/disconnect',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => array(
+                "Authorization: " . $device_token
+            ),
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 30
+        ));
+        curl_exec($curl);
+        curl_close($curl);
+    }
+
+    // 2. Kosongkan token & nomor WA di database
     $stmt = $pdo->prepare("UPDATE developers SET fonnte_token = NULL, wa_number = NULL WHERE id = ?");
     $stmt->execute([$developer_id]);
 
