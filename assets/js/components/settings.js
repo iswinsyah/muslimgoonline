@@ -4,6 +4,12 @@ export class SettingsComponent {
     constructor(containerId, state) {
         this.container = document.getElementById(containerId);
         this.state = state;
+        
+        // Bersihkan interval polling lama jika tersisa
+        if (window.waPollingInterval) {
+            clearInterval(window.waPollingInterval);
+            window.waPollingInterval = null;
+        }
     }
 
     render() {
@@ -95,7 +101,7 @@ export class SettingsComponent {
                         <div class="grid grid-cols-1 ${this.state.currentUser.role === 'Super Admin' ? 'md:grid-cols-2' : ''} gap-6">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nomor WhatsApp Gateway</label>
-                                <input type="text" name="wa_number" value="${settings.wa_number || ''}" placeholder="Contoh: 081234567890" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#2845D6]" />
+                                <input type="text" name="wa_number" id="wa_number_input" value="${settings.wa_number || ''}" placeholder="Contoh: 081234567890" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#2845D6]" ${this.state.currentUser.role !== 'Super Admin' && settings.wa_number ? 'readonly' : ''} />
                                 <p class="text-[9px] text-slate-400 mt-1">Nomor WhatsApp yang digunakan untuk merespons chat asisten AI.</p>
                             </div>
                             
@@ -109,6 +115,28 @@ export class SettingsComponent {
                             <input type="hidden" name="fonnte_token" value="${settings.fonnte_token || ''}" />
                             `}
                         </div>
+
+                        <!-- Panel Koneksi WhatsApp (Hanya untuk Tenant / Developer) -->
+                        ${this.state.currentUser.role !== 'Super Admin' ? `
+                        <div id="wa-connection-panel" class="mt-4 bg-slate-50 border border-slate-200 rounded-[1.5rem] p-6 border-dashed">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Status WhatsApp Gateway</h5>
+                                    <p class="text-[10px] text-slate-500 mt-0.5">Sambungkan nomor Anda agar AI dapat mengirim balasan otomatis.</p>
+                                </div>
+                                <div id="wa-status-badge">
+                                    <span class="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full bg-slate-200 text-slate-500">
+                                        Memeriksa...
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div id="wa-connection-actions" class="mt-6 hidden">
+                                <!-- Konten dinamis diisi oleh checkWhatsAppStatus() -->
+                            </div>
+                        </div>
+                        ` : ''}
+
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Instruksi Asisten CS AI (Prompt Training)</label>
                             <textarea name="ai_cs_instruction" rows="4" placeholder="Contoh: Anda adalah asisten CS untuk Royal Syariah Residence. Jawab ramah dan berfokus pada promo free DP..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#2845D6]">${settings.ai_cs_instruction || ''}</textarea>
@@ -138,6 +166,10 @@ export class SettingsComponent {
 
         this.attachEventListeners();
         if (window.lucide) window.lucide.createIcons();
+
+        if (this.state.currentUser.role !== 'Super Admin') {
+            this.checkWhatsAppStatus();
+        }
     }
 
     attachEventListeners() {
@@ -223,5 +255,188 @@ export class SettingsComponent {
                 btn.disabled = false;
             }
         });
+    }
+
+    async checkWhatsAppStatus() {
+        const badge = this.container.querySelector('#wa-status-badge');
+        const actions = this.container.querySelector('#wa-connection-actions');
+        if (!badge || !actions) return;
+
+        try {
+            const response = await fetch('api/check_whatsapp_status.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ developer_id: this.state.currentUser.developer_id })
+            });
+            const result = await response.json();
+            if (!result.status) throw new Error(result.message);
+
+            const settings = this.state.developerSettings || {};
+
+            if (result.device_status === 'connect') {
+                badge.innerHTML = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full flex items-center gap-1 font-bold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>TERHUBUNG</span>`;
+                actions.innerHTML = `
+                    <div class="space-y-3 text-left">
+                        <p class="text-xs text-slate-600">
+                            WhatsApp Gateway Anda saat ini menggunakan nomor: <strong class="text-slate-800 font-mono font-bold">${settings.wa_number || ''}</strong>
+                        </p>
+                        <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-xs text-emerald-800 font-medium">
+                            Layanan Asisten CS AI aktif dan siap merespons chat masuk secara otomatis pada nomor di atas.
+                        </div>
+                        <button type="button" id="btn-disconnect-wa" class="mt-2 py-2.5 px-4 bg-red-50 text-red-600 border border-red-200 rounded-xl text-[10px] font-black uppercase tracking-wider hover:bg-red-100 transition-all font-bold">
+                            Putuskan Koneksi / Ganti Nomor
+                        </button>
+                    </div>
+                `;
+                actions.classList.remove('hidden');
+
+                const btnDisconnect = actions.querySelector('#btn-disconnect-wa');
+                if (btnDisconnect) {
+                    btnDisconnect.addEventListener('click', async () => {
+                        if (confirm('Apakah Anda yakin ingin memutuskan koneksi WhatsApp ini? Fitur CS AI tidak akan berfungsi sampai Anda menghubungkan kembali nomor WhatsApp.')) {
+                            btnDisconnect.disabled = true;
+                            btnDisconnect.innerText = 'Memutuskan...';
+                            try {
+                                const disRes = await fetch('api/disconnect_whatsapp.php', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ developer_id: this.state.currentUser.developer_id })
+                                });
+                                const disResult = await disRes.json();
+                                if (!disRes.ok) throw new Error(disResult.message);
+                                alert('WhatsApp berhasil diputuskan!');
+                                window.location.reload();
+                            } catch (e) {
+                                alert('Error: ' + e.message);
+                                btnDisconnect.disabled = false;
+                                btnDisconnect.innerText = 'Putuskan Koneksi / Ganti Nomor';
+                            }
+                        }
+                    });
+                }
+            } else {
+                badge.innerHTML = `<span class="bg-red-50 text-red-600 border border-red-200 px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full font-bold">TERPUTUS</span>`;
+                
+                if (!settings.wa_number) {
+                    actions.innerHTML = `
+                        <div class="space-y-2 text-slate-500 text-xs text-left">
+                            <p class="font-bold text-slate-600">⚠️ Nomor WhatsApp Gateway belum diatur.</p>
+                            <p class="text-[10px] text-slate-400">Silakan isi kolom <strong>Nomor WhatsApp Gateway</strong> di atas terlebih dahulu, kemudian klik <strong>Simpan Pengaturan</strong> agar sistem dapat memproses koneksi.</p>
+                        </div>
+                    `;
+                } else {
+                    actions.innerHTML = `
+                        <div class="space-y-3 text-left">
+                            <p class="text-xs text-slate-600">
+                                Nomor WhatsApp terdaftar: <strong class="text-slate-800 font-mono font-bold">${settings.wa_number || ''}</strong>
+                            </p>
+                            <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 text-xs text-amber-800 font-medium">
+                                WhatsApp belum terhubung. Silakan klik tombol di bawah untuk membuat sesi koneksi dan melakukan scan QR Code.
+                            </div>
+                            <button type="button" id="btn-connect-wa" class="py-2.5 px-5 bg-[#2845D6] text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all font-bold">
+                                Hubungkan WhatsApp via QR Code
+                            </button>
+                        </div>
+                    `;
+                    
+                    const btnConnect = actions.querySelector('#btn-connect-wa');
+                    if (btnConnect) {
+                        btnConnect.addEventListener('click', async () => {
+                            btnConnect.disabled = true;
+                            btnConnect.innerText = 'Menyiapkan QR Code...';
+                            try {
+                                const qrRes = await fetch('api/get_whatsapp_qr.php', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        developer_id: this.state.currentUser.developer_id,
+                                        wa_number: settings.wa_number
+                                    })
+                                });
+                                const qrResult = await qrRes.json();
+                                if (!qrRes.ok) throw new Error(qrResult.message || 'Gagal mengambil QR Code');
+
+                                if (qrResult.already_connected) {
+                                    alert('WhatsApp Anda sudah terhubung!');
+                                    window.location.reload();
+                                    return;
+                                }
+
+                                // Tampilkan QR Code
+                                badge.innerHTML = `<span class="bg-yellow-50 text-yellow-600 border border-yellow-200 px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full font-bold">MENUNGGU SCAN</span>`;
+                                actions.innerHTML = `
+                                    <div class="space-y-4 text-center">
+                                        <div class="bg-white p-4 inline-block border border-slate-200 rounded-2xl shadow-sm">
+                                            <img src="${qrResult.qr}" class="w-48 h-48 mx-auto" />
+                                        </div>
+                                        <div class="max-w-md mx-auto">
+                                            <p class="text-xs font-bold text-slate-700">Tautkan Perangkat WhatsApp Anda</p>
+                                            <ol class="text-[10px] text-slate-500 text-left list-decimal list-inside mt-2 space-y-1 mx-auto max-w-[280px]">
+                                                <li>Buka aplikasi WhatsApp di HP Anda</li>
+                                                <li>Ketuk <strong>Menu</strong> atau <strong>Pengaturan</strong></li>
+                                                <li>Pilih <strong>Perangkat Tertaut (Linked Devices)</strong></li>
+                                                <li>Ketuk <strong>Tautkan Perangkat</strong> dan scan QR di atas</li>
+                                            </ol>
+                                        </div>
+                                        <p class="text-[10px] text-slate-400 italic mt-2">Menunggu scan... QR code diperbarui secara otomatis di HP</p>
+                                        <button type="button" id="btn-cancel-connect" class="py-2 px-4 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all font-bold mt-2">
+                                            Batalkan
+                                        </button>
+                                    </div>
+                                `;
+
+                                this.startPollingStatus();
+
+                                const btnCancel = actions.querySelector('#btn-cancel-connect');
+                                if (btnCancel) {
+                                    btnCancel.addEventListener('click', () => {
+                                        this.stopPollingStatus();
+                                        this.checkWhatsAppStatus();
+                                    });
+                                }
+
+                            } catch (err) {
+                                alert('Error: ' + err.message);
+                                btnConnect.disabled = false;
+                                btnConnect.innerText = 'Hubungkan WhatsApp via QR Code';
+                            }
+                        });
+                    }
+                }
+                actions.classList.remove('hidden');
+            }
+        } catch (e) {
+            badge.innerHTML = `<span class="bg-red-50 text-red-600 border border-red-200 px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full font-bold">ERROR STATUS</span>`;
+            actions.innerHTML = `<p class="text-xs text-red-500 font-bold text-left">Gagal memuat status WhatsApp: ${e.message}</p>`;
+            actions.classList.remove('hidden');
+        }
+    }
+
+    startPollingStatus() {
+        this.stopPollingStatus();
+        window.waPollingInterval = setInterval(async () => {
+            try {
+                const response = await fetch('api/check_whatsapp_status.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ developer_id: this.state.currentUser.developer_id })
+                });
+                const result = await response.json();
+                if (result.status && result.device_status === 'connect') {
+                    this.stopPollingStatus();
+                    alert('WhatsApp berhasil terhubung! Layanan CS AI kini aktif.');
+                    window.location.reload();
+                }
+            } catch (e) {
+                console.error("Polling error:", e);
+            }
+        }, 5000);
+    }
+
+    stopPollingStatus() {
+        if (window.waPollingInterval) {
+            clearInterval(window.waPollingInterval);
+            window.waPollingInterval = null;
+        }
     }
 }
