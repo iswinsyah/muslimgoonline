@@ -132,10 +132,14 @@ try {
     $host = $_SERVER['HTTP_HOST'];
     $webhook_url = $protocol . $host . "/api/whatsapp_webhook.php";
     
-    // Panggil update-device menggunakan Device Token
+    // Panggil update-device menggunakan Device Token dan aktifkan autoread
     callFonnte('https://api.fonnte.com/update-device', $device_token, [
+        'device' => $wa_number,
         'name' => 'Tenant: ' . substr($company_name, 0, 20),
-        'webhook' => $webhook_url
+        'webhook' => $webhook_url,
+        'autoread' => 'true',
+        'personal' => 'true',
+        'group' => 'false'
     ]);
 
     // 8. Dapatkan QR Code koneksi menggunakan Device Token
