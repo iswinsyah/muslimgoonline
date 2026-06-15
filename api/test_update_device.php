@@ -1,16 +1,15 @@
 <?php
 // api/test_update_device.php
-header("Content-Type: application/json");
+header("Content-Type: text/plain");
 require_once 'db_connect_pdo.php';
 require_once 'config.php';
 
-// We want to test updating device for VQ Land (which has WA number 6285196642799 or similar)
 $stmt = $pdo->prepare("SELECT id, nama_perusahaan, wa_number, fonnte_token FROM developers WHERE nama_perusahaan LIKE ?");
 $stmt->execute(['%VQ Land%']);
 $dev = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$dev) {
-    echo json_encode(['error' => 'Developer VQ Land not found in DB']);
+    echo "ERROR: Developer VQ Land not found in DB\n";
     exit;
 }
 
@@ -42,9 +41,9 @@ $response = curl_exec($curl);
 $err = curl_error($curl);
 curl_close($curl);
 
-echo json_encode([
-    'developer' => $dev,
-    'fields_sent' => $fields,
-    'curl_error' => $err,
-    'fonnte_response' => json_decode($response, true) ?? $response
-], JSON_PRETTY_PRINT);
+echo "DEVELOPER:\n";
+print_r($dev);
+echo "\nFIELDS SENT:\n";
+print_r($fields);
+echo "\nCURL ERROR: " . $err . "\n";
+echo "\nFONNTE RESPONSE:\n" . $response . "\n";
