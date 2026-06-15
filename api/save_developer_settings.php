@@ -1,6 +1,6 @@
 <?php
 // api/save_developer_settings.php
-// Trigger redeploy: 1
+// Trigger redeploy: 2
 header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: POST");
 require_once 'db_connect_pdo.php';
