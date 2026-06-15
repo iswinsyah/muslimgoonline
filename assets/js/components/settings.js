@@ -101,7 +101,7 @@ export class SettingsComponent {
                         <div class="grid grid-cols-1 ${this.state.currentUser.role === 'Super Admin' ? 'md:grid-cols-2' : ''} gap-6">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nomor WhatsApp Gateway</label>
-                                <input type="text" name="wa_number" id="wa_number_input" value="${settings.wa_number || ''}" placeholder="Contoh: 081234567890" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#2845D6]" ${this.state.currentUser.role !== 'Super Admin' && settings.wa_number ? 'readonly' : ''} />
+                                <input type="text" name="wa_number" id="wa_number_input" value="${settings.wa_number || ''}" placeholder="Contoh: 081234567890" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-[#2845D6]" />
                                 <p class="text-[9px] text-slate-400 mt-1">Nomor WhatsApp yang digunakan untuk merespons chat asisten AI.</p>
                             </div>
                             
@@ -260,6 +260,7 @@ export class SettingsComponent {
     async checkWhatsAppStatus() {
         const badge = this.container.querySelector('#wa-status-badge');
         const actions = this.container.querySelector('#wa-connection-actions');
+        const waInput = this.container.querySelector('#wa_number_input');
         if (!badge || !actions) return;
 
         try {
@@ -272,6 +273,13 @@ export class SettingsComponent {
             if (!result.status) throw new Error(result.message);
 
             const settings = this.state.developerSettings || {};
+
+            // Mengatur readOnly secara dinamis berdasarkan status koneksi
+            if (this.state.currentUser.role !== 'Super Admin') {
+                if (waInput) {
+                    waInput.readOnly = (result.device_status === 'connect');
+                }
+            }
 
             if (result.device_status === 'connect') {
                 badge.innerHTML = `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-full flex items-center gap-1 font-bold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>TERHUBUNG</span>`;

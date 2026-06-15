@@ -12,7 +12,7 @@ import { CalendarComponent } from './components/calendar.js';
 import { ValidationComponent } from './components/validation.js';
 import { MenuManagementComponent } from './components/menu_management.js';
 import { ImpersonationComponent } from './components/impersonation.js';
-import { SettingsComponent } from './components/settings.js?v=1.0.8';
+import { SettingsComponent } from './components/settings.js?v=1.0.9';
 import { TeamManagementComponent } from './components/team_management.js';
 import { BuyerListComponent } from './components/buyer_list.js';
 import { TokenPoolComponent } from './components/token_pool.js';

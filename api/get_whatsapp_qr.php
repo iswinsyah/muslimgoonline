@@ -157,7 +157,13 @@ try {
     } else {
         $reason = $qrResponse['reason'] ?? 'Gagal membuat QR Code dari Fonnte. Pastikan nomor WhatsApp tidak sedang terhubung.';
         $reason_lower = strtolower($reason);
-        if (strpos($reason_lower, 'already connected') !== false) {
+        if (strpos($reason_lower, 'free device already connected') !== false) {
+            http_response_code(400);
+            echo json_encode([
+                'status' => false,
+                'message' => 'Batas maksimal perangkat WhatsApp gratis di Fonnte telah tercapai (hanya 1 perangkat terhubung yang diperbolehkan). Silakan hubungi Super Admin untuk menonaktifkan perangkat lain.'
+            ]);
+        } elseif (strpos($reason_lower, 'already connected') !== false) {
             echo json_encode([
                 'status' => true,
                 'already_connected' => true,
