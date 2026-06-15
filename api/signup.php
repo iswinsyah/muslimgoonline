@@ -64,9 +64,9 @@ try {
         }
         // --- End slug generation ---
 
-        // Insert perusahaan baru dengan status 'Active' dan kontak dari no whatsapp
+        // Insert perusahaan baru dengan status 'Pending' agar divalidasi oleh Super Admin
         $stmtDev = $pdo->prepare(
-            "INSERT INTO developers (nama_perusahaan, company_slug, kontak, status_langganan) VALUES (?, ?, ?, 'Active')"
+            "INSERT INTO developers (nama_perusahaan, company_slug, kontak, status_langganan) VALUES (?, ?, ?, 'Pending')"
         );
         $stmtDev->execute([$nama_perusahaan, $slug, $no_whatsapp]);
         $developer_id = $pdo->lastInsertId();

@@ -108,8 +108,16 @@ if (!loggedInUser) {
 
     async function handleRouting() {
         const hash = window.location.hash.substring(1);
+        
+        const isPending = state.currentUser.role !== 'Super Admin' && 
+                          state.developerSettings && 
+                          state.developerSettings.status_langganan === 'Pending';
 
-        if (hash === 'settings' && state.currentUser.role === 'Developer' && state.currentUser.is_first_login) {
+        if (isPending) {
+            console.log("Tenant pending, force to settings.");
+            window.location.hash = 'settings';
+            switchTab('settings');
+        } else if (hash === 'settings' && state.currentUser.role === 'Developer' && state.currentUser.is_first_login) {
             console.log("Developer login pertama, arahkan ke settings (Menu Management).");
             switchTab('settings'); // Ini akan memuat MenuManagementComponent
             await markFirstLoginAsComplete();
@@ -120,7 +128,15 @@ if (!loggedInUser) {
         // Dengarkan perubahan hash untuk navigasi tanpa reload halaman
         window.addEventListener('hashchange', () => {
             const newHash = window.location.hash.substring(1);
-            switchTab(newHash || 'pipeline');
+            const isPendingChange = state.currentUser.role !== 'Super Admin' && 
+                                    state.developerSettings && 
+                                    state.developerSettings.status_langganan === 'Pending';
+            if (isPendingChange) {
+                window.location.hash = 'settings';
+                switchTab('settings');
+            } else {
+                switchTab(newHash || 'pipeline');
+            }
         });
     }
 
@@ -203,7 +219,12 @@ if (!loggedInUser) {
         if (state.currentRole !== 'Super Admin' && status_langganan === 'Pending') {
             const pendingOverlay = document.querySelector('#pending-overlay');
             if (pendingOverlay) {
-                pendingOverlay.classList.remove('hidden');
+                // Jangan tampilkan full-screen overlay jika sedang membuka settings
+                if (state.currentTab === 'settings') {
+                    pendingOverlay.classList.add('hidden');
+                } else {
+                    pendingOverlay.classList.remove('hidden');
+                }
                 const btnAdd = document.getElementById('btn-add-lead');
                 if (btnAdd) btnAdd.style.display = 'none';
             }
@@ -484,9 +505,17 @@ if (!loggedInUser) {
             if (!menusInCategory) return;
 
             // Filter menu berdasarkan hak akses role
-            const accessibleMenus = menusInCategory.filter(menu => 
-                menu.roles.includes('All') || menu.roles.includes(state.currentRole)
-            );
+            const accessibleMenus = menusInCategory.filter(menu => {
+                const hasRole = menu.roles.includes('All') || menu.roles.includes(state.currentRole);
+                const isPending = state.currentUser.role !== 'Super Admin' && 
+                                  state.developerSettings && 
+                                  state.developerSettings.status_langganan === 'Pending';
+                if (isPending) {
+                    // Jika pending, hanya perbolehkan akses ke settings
+                    return hasRole && menu.menu_id === 'settings';
+                }
+                return hasRole;
+            });
 
             if (accessibleMenus.length === 0) return;
 
