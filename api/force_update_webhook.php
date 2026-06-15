@@ -35,13 +35,10 @@ $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 curl_close($curl);
 
 if ($err) {
-    echo json_encode(['status' => 'error', 'msg' => 'curl_err']);
+    echo json_encode(['status' => 'error', 'msg' => $err]);
 } else {
-    $decoded = json_decode($response, true);
-    // Return only simplified status so WAF is not triggered
     echo json_encode([
-        'status' => isset($decoded['status']) ? $decoded['status'] : false,
-        'http_code' => $httpCode,
-        'msg' => isset($decoded['message']) ? 'has_message' : 'no_message'
+        'raw_b64' => base64_encode($response),
+        'http_code' => $httpCode
     ]);
 }
