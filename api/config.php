@@ -9,4 +9,4 @@ define('GEMINI_GAS_URL', 'https://script.google.com/macros/s/AKfycbyCq_jusyiC-LB
 // Konfigurasi Notifikasi Super Admin
 define('SUPER_ADMIN_WA', '0895808626677');
 define('FONNTE_TOKEN_ADMIN', 'PASTE_TOKEN_FONNTE_ADMIN_DISINI');
-define('FONNTE_ACCOUNT_TOKEN', 'PASTE_TOKEN_AKUN_FONNTE_DISINI');
+define('FONNTE_ACCOUNT_TOKEN', 'uUGYQuWmqZrmhiv6Vfq2h21h5');
