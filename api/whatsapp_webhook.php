@@ -105,9 +105,11 @@ function callGeminiAI($prompt, $developer_id) {
     
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $err = curl_error($ch);
     curl_close($ch);
     
     if ($httpCode !== 200) {
+        file_put_contents('webhook_log.txt', date('Y-m-d H:i:s') . " | Gemini API call failed -> HTTP: $httpCode, Error: $err, Response: $response\n", FILE_APPEND);
         return "Maaf, saat ini layanan asisten otomatis kami sedang dalam pemeliharaan. Mohon tinggalkan pesan, admin kami akan segera menghubungi Anda.";
     }
     
