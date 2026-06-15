@@ -1,25 +1,17 @@
 <?php
-// api/get_webhook_logs.php - temporary log reader (compact)
 header("Content-Type: text/plain");
 $log_file = __DIR__ . '/webhook_log.txt';
-if (!file_exists($log_file)) { echo "Log not found."; exit; }
-
+if (!file_exists($log_file)) { echo "Not found"; exit; }
 $content = file_get_contents($log_file);
-// Split by date pattern to get individual entries
 $entries = preg_split('/(?=\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \|)/', $content);
-$total = count($entries);
-
-echo "Total entries: $total\n";
-echo "=================================\n";
-
-// Show last 15 entries, truncate each to 200 chars
-$start = max(0, $total - 15);
-for ($i = $start; $i < $total; $i++) {
-    $entry = trim($entries[$i]);
-    if (empty($entry)) continue;
-    // Truncate long entries
-    if (strlen($entry) > 200) {
-        $entry = substr($entry, 0, 200) . "...[TRUNCATED]";
+echo "Total:" . count($entries) . "\n";
+foreach ($entries as $e) {
+    $e = trim($e);
+    if (empty($e)) continue;
+    // Show entries after 16:00 or containing error/failed/Gemini
+    $isRecent = preg_match('/^2026-06-15 1[6-9]:/', $e);
+    $isError = stripos($e, 'error') !== false || stripos($e, 'failed') !== false || stripos($e, 'Gemini API') !== false;
+    if ($isRecent || $isError) {
+        echo substr($e, 0, 150) . "\n---\n";
     }
-    echo $entry . "\n---\n";
 }
