@@ -137,9 +137,13 @@ try {
     ]);
 
     if (isset($qrResponse['status']) && $qrResponse['status'] === true && !empty($qrResponse['url'])) {
+        $qr_image = $qrResponse['url'];
+        if (strpos($qr_image, 'data:image') !== 0) {
+            $qr_image = 'data:image/png;base64,' . $qr_image;
+        }
         echo json_encode([
             'status' => true,
-            'qr' => $qrResponse['url'],
+            'qr' => $qr_image,
             'wa_number' => $wa_number,
             'message' => 'Silakan scan QR code untuk menghubungkan WhatsApp.'
         ]);
