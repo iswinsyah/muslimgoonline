@@ -1,4 +1,5 @@
 <?php
+// api/gemini.php - auth fix deploy
 require_once 'config.php';
 
 header("Content-Type: application/json");
