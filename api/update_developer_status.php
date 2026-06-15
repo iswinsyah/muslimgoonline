@@ -24,34 +24,38 @@ try {
     $pdo->beginTransaction();
 
     // --- AI PROVISIONING AGENT LOGIC ---
-    // Ambil data developer lama untuk melihat apakah sudah ada token
+    // Ambil data developer lama untuk melihat apakah sudah ada token/nomor WA
     $stmtGetDev = $pdo->prepare("SELECT fonnte_token, wa_number FROM developers WHERE id = ?");
     $stmtGetDev->execute([$developer_id]);
     $existingDev = $stmtGetDev->fetch();
 
     if ($new_status === 'Active') {
-        if (empty($fonnte_token)) {
-            // Jika di DB sudah ada token, pakai yang di DB
-            if ($existingDev && !empty($existingDev['fonnte_token'])) {
+        // Prioritaskan nilai wa_number & token yang sudah ada di database developer (jika ada)
+        if ($existingDev) {
+            if (!empty($existingDev['wa_number'])) {
+                $wa_number = $existingDev['wa_number'];
+            }
+            if (empty($fonnte_token) && !empty($existingDev['fonnte_token'])) {
                 $fonnte_token = $existingDev['fonnte_token'];
-                // Gunakan wa_number dari DB jika input wa_number kosong atau sama dengan kontak/nomor lama
-                if (empty($wa_number) || $wa_number == $existingDev['wa_number']) {
-                    $wa_number = $existingDev['wa_number'];
-                }
-            } else {
-                // Jika DB kosong, baru cari di Pool
-                $stmtPool = $pdo->prepare("SELECT id, token, wa_number FROM fonnte_tokens_pool WHERE status = 'Available' LIMIT 1");
-                $stmtPool->execute();
-                $poolItem = $stmtPool->fetch();
+            }
+        }
 
-                if ($poolItem) {
-                    $fonnte_token = $poolItem['token'];
+        // Jika token masih kosong (baik di DB maupun input admin kosong), baru cari di Pool
+        if (empty($fonnte_token)) {
+            $stmtPool = $pdo->prepare("SELECT id, token, wa_number FROM fonnte_tokens_pool WHERE status = 'Available' LIMIT 1");
+            $stmtPool->execute();
+            $poolItem = $stmtPool->fetch();
+
+            if ($poolItem) {
+                $fonnte_token = $poolItem['token'];
+                // Gunakan wa_number dari pool jika di DB juga kosong
+                if (empty($wa_number)) {
                     $wa_number = $poolItem['wa_number'];
-                    
-                    // Tandai token di gudang sudah terpakai
-                    $stmtUpdatePool = $pdo->prepare("UPDATE fonnte_tokens_pool SET status = 'Used', assigned_to_developer_id = ? WHERE id = ?");
-                    $stmtUpdatePool->execute([$developer_id, $poolItem['id']]);
                 }
+                
+                // Tandai token di gudang sudah terpakai
+                $stmtUpdatePool = $pdo->prepare("UPDATE fonnte_tokens_pool SET status = 'Used', assigned_to_developer_id = ? WHERE id = ?");
+                $stmtUpdatePool->execute([$developer_id, $poolItem['id']]);
             }
         }
     }
