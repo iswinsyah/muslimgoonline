@@ -149,8 +149,8 @@ try {
         ]);
     } else {
         $reason = $qrResponse['reason'] ?? 'Gagal membuat QR Code dari Fonnte. Pastikan nomor WhatsApp tidak sedang terhubung.';
-        // Jika device sudah terhubung, status QR Fonnte bisa false karena "already connected"
-        if (isset($qrResponse['reason']) && strpos(strtolower($qrResponse['reason']), 'connected') !== false) {
+        $reason_lower = strtolower($reason);
+        if (strpos($reason_lower, 'already connected') !== false) {
             echo json_encode([
                 'status' => true,
                 'already_connected' => true,
