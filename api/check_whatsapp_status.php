@@ -67,10 +67,17 @@ try {
     $device_status = 'disconnect';
     $found = false;
 
+    function formatTo62($number) {
+        $number = preg_replace('/\D/', '', $number);
+        if (strpos($number, '0') === 0) {
+            $number = '62' . substr($number, 1);
+        }
+        return $number;
+    }
+
     if (isset($resData['status']) && $resData['status'] === true && !empty($resData['data'])) {
         foreach ($resData['data'] as $devItem) {
-            $cleanedItemDev = preg_replace('/\D/', '', $devItem['device']);
-            if ($cleanedItemDev === $wa_number) {
+            if (formatTo62($devItem['device']) === formatTo62($wa_number)) {
                 $device_status = $devItem['status']; // 'connect' or 'disconnect'
                 $found = true;
                 break;

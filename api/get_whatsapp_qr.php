@@ -79,13 +79,20 @@ try {
         return json_decode($response, true);
     }
 
+    function formatTo62($number) {
+        $number = preg_replace('/\D/', '', $number);
+        if (strpos($number, '0') === 0) {
+            $number = '62' . substr($number, 1);
+        }
+        return $number;
+    }
+
     // 4. Periksa apakah nomor tersebut sudah terdaftar di daftar device Fonnte
     $listResponse = callFonnte('https://api.fonnte.com/get-devices', FONNTE_ACCOUNT_TOKEN);
     
     if (isset($listResponse['status']) && $listResponse['status'] === true && !empty($listResponse['data'])) {
         foreach ($listResponse['data'] as $devItem) {
-            $cleanedItemDev = preg_replace('/\D/', '', $devItem['device']);
-            if ($cleanedItemDev === $wa_number) {
+            if (formatTo62($devItem['device']) === formatTo62($wa_number)) {
                 // Device sudah terdaftar di Fonnte, gunakan token yang ada
                 $device_token = $devItem['token'];
                 break;
