@@ -30,12 +30,6 @@ $fields = [
     'group' => 'false'
 ];
 
-echo "DEVELOPER:\n";
-print_r($dev);
-echo "\nFIELDS SENT:\n";
-print_r($fields);
-
-echo "\nSTARTING CURL...\n";
 $curl = curl_init();
 curl_setopt_array($curl, array(
     CURLOPT_URL => 'https://api.fonnte.com/update-device',
@@ -54,6 +48,6 @@ $err = curl_error($curl);
 $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 curl_close($curl);
 
-echo "\nCURL ERROR: " . ($err ?: 'None') . "\n";
-echo "HTTP CODE: " . $httpCode . "\n";
-echo "\nFONNTE RESPONSE:\n" . $response . "\n";
+$out = "DEVELOPER:\n" . print_r($dev, true) . "\nFIELDS SENT:\n" . print_r($fields, true) . "\nCURL ERROR: " . ($err ?: 'None') . "\nHTTP CODE: " . $httpCode . "\nFONNTE RESPONSE:\n" . $response . "\n";
+file_put_contents('test_update_device_output.txt', $out);
+echo "DONE. Written to test_update_device_output.txt";
