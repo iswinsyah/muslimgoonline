@@ -333,13 +333,42 @@ export class SettingsComponent {
                             <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 text-xs text-amber-800 font-medium">
                                 WhatsApp belum terhubung. Silakan klik tombol di bawah untuk membuat sesi koneksi dan melakukan scan QR Code.
                             </div>
-                            <button type="button" id="btn-connect-wa" class="py-2.5 px-5 bg-[#2845D6] text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all font-bold">
-                                Hubungkan WhatsApp via QR Code
-                            </button>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <button type="button" id="btn-connect-wa" class="py-2.5 px-5 bg-[#2845D6] text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all font-bold">
+                                    Hubungkan WhatsApp via QR Code
+                                </button>
+                                <button type="button" id="btn-reset-number" class="py-2.5 px-4 bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 rounded-xl text-xs font-bold transition-all">
+                                    Ubah / Ganti Nomor
+                                </button>
+                            </div>
                         </div>
                     `;
                     
                     const btnConnect = actions.querySelector('#btn-connect-wa');
+                    const btnResetNumber = actions.querySelector('#btn-reset-number');
+                    if (btnResetNumber) {
+                        btnResetNumber.addEventListener('click', async () => {
+                            if (confirm('Apakah Anda yakin ingin mengganti nomor WhatsApp ini?')) {
+                                btnResetNumber.disabled = true;
+                                btnResetNumber.innerText = 'Mengubah...';
+                                try {
+                                    const disRes = await fetch('api/disconnect_whatsapp.php', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ developer_id: this.state.currentUser.developer_id })
+                                    });
+                                    const disResult = await disRes.json();
+                                    if (!disRes.ok) throw new Error(disResult.message);
+                                    alert('Silakan masukkan nomor baru pada kolom Nomor WhatsApp Gateway.');
+                                    window.location.reload();
+                                } catch (e) {
+                                    alert('Error: ' + e.message);
+                                    btnResetNumber.disabled = false;
+                                    btnResetNumber.innerText = 'Ubah / Ganti Nomor';
+                                }
+                            }
+                        });
+                    }
                     if (btnConnect) {
                         btnConnect.addEventListener('click', async () => {
                             btnConnect.disabled = true;
