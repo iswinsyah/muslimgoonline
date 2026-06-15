@@ -92,7 +92,10 @@ function callGeminiAI($prompt, $developer_id) {
         return "Maaf, saat ini layanan asisten otomatis kami sedang dalam pemeliharaan. Mohon tinggalkan pesan, admin kami akan segera menghubungi Anda.";
     }
 
-    $payload = ["prompt" => $prompt];
+    $payload = [
+        "prompt" => $prompt,
+        "key" => defined('GEMINI_API_KEY') ? GEMINI_API_KEY : ''
+    ];
     
     $ch = curl_init(GEMINI_GAS_URL);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

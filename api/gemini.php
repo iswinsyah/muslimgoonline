@@ -22,7 +22,8 @@ if (!defined('GEMINI_GAS_URL') || empty(GEMINI_GAS_URL)) {
 }
 
 $payload = [
-    "prompt" => $prompt
+    "prompt" => $prompt,
+    "key" => defined('GEMINI_API_KEY') ? GEMINI_API_KEY : ''
 ];
 
 $ch = curl_init(GEMINI_GAS_URL);
