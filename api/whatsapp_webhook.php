@@ -21,8 +21,13 @@ if (empty($_POST)) {
     }
 }
 
+// LOG INPUT UNTUK DEBUGGING
+$raw_input = file_get_contents('php://input');
+file_put_contents('webhook_log.txt', date('Y-m-d H:i:s') . " | INCOMING -> Sender: $sender, Message: $message, Device: $device | POST: " . json_encode($_POST) . " | RAW: " . $raw_input . "\n", FILE_APPEND);
+
 if (!$sender || !$message || !$device) {
     // Abaikan jika data tidak lengkap
+    file_put_contents('webhook_log.txt', date('Y-m-d H:i:s') . " | Ignored due to incomplete data.\n", FILE_APPEND);
     exit;
 }
 
@@ -40,11 +45,13 @@ try {
 
     if (!$tenant) {
         // Jika nomor device tidak terdaftar di sistem kita, abaikan
+        file_put_contents('webhook_log.txt', date('Y-m-d H:i:s') . " | Tenant NOT FOUND in database for device: $device\n", FILE_APPEND);
         exit;
     }
 
     if (empty($tenant['fonnte_token'])) {
         // Jika tenant belum punya token, sistem tidak bisa membalas
+        file_put_contents('webhook_log.txt', date('Y-m-d H:i:s') . " | Tenant found (ID: {$tenant['id']}) but has EMPTY fonnte_token\n", FILE_APPEND);
         exit;
     }
 
@@ -64,6 +71,7 @@ Berikan jawaban yang singkat, padat, persuasif, dan sangat ramah. Jangan gunakan
     $ai_answer = callGeminiAI($prompt, $tenant['id']);
 
     // 4. Balas ke WhatsApp menggunakan API Fonnte
+    file_put_contents('webhook_log.txt', date('Y-m-d H:i:s') . " | Sending reply -> Target: $sender, Reply: $ai_answer, Token: " . substr($tenant['fonnte_token'], 0, 5) . "...\n", FILE_APPEND);
     sendToFonnte($sender, $ai_answer, $tenant['fonnte_token']);
 
     // Catat pengiriman WhatsApp ke log
@@ -75,6 +83,7 @@ Berikan jawaban yang singkat, padat, persuasif, dan sangat ramah. Jangan gunakan
     }
 
 } catch (Exception $e) {
+    file_put_contents('webhook_log.txt', date('Y-m-d H:i:s') . " | ERROR occurred: " . $e->getMessage() . "\n", FILE_APPEND);
     error_log("WA Webhook Error: " . $e->getMessage());
 }
 
