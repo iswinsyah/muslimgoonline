@@ -3,14 +3,16 @@
 header("Content-Type: text/plain");
 $log_file = __DIR__ . '/webhook_log.txt';
 if (file_exists($log_file)) {
-    // Show last 5000 chars to get recent entries
     $content = file_get_contents($log_file);
-    $len = strlen($content);
-    if ($len > 5000) {
-        echo "... (showing last 5000 of $len bytes)\n";
-        echo substr($content, -5000);
-    } else {
-        echo $content;
+    $lines = explode("\n", $content);
+    $total = count($lines);
+    
+    // Show last 50 lines
+    $start = max(0, $total - 50);
+    echo "Total lines: $total (showing last 50)\n";
+    echo "=================================\n";
+    for ($i = $start; $i < $total; $i++) {
+        echo $lines[$i] . "\n";
     }
 } else {
     echo "Log file not found.";
