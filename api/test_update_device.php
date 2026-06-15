@@ -1,5 +1,9 @@
 <?php
 // api/test_update_device.php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 header("Content-Type: text/plain");
 require_once 'db_connect_pdo.php';
 require_once 'config.php';
@@ -26,6 +30,12 @@ $fields = [
     'group' => 'false'
 ];
 
+echo "DEVELOPER:\n";
+print_r($dev);
+echo "\nFIELDS SENT:\n";
+print_r($fields);
+
+echo "\nSTARTING CURL...\n";
 $curl = curl_init();
 curl_setopt_array($curl, array(
     CURLOPT_URL => 'https://api.fonnte.com/update-device',
@@ -34,16 +44,16 @@ curl_setopt_array($curl, array(
     CURLOPT_POSTFIELDS => $fields,
     CURLOPT_HTTPHEADER => array(
         "Authorization: " . $device_token
-    )
+    ),
+    CURLOPT_CONNECTTIMEOUT => 5,
+    CURLOPT_TIMEOUT => 10
 ));
 
 $response = curl_exec($curl);
 $err = curl_error($curl);
+$httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 curl_close($curl);
 
-echo "DEVELOPER:\n";
-print_r($dev);
-echo "\nFIELDS SENT:\n";
-print_r($fields);
-echo "\nCURL ERROR: " . $err . "\n";
+echo "\nCURL ERROR: " . ($err ?: 'None') . "\n";
+echo "HTTP CODE: " . $httpCode . "\n";
 echo "\nFONNTE RESPONSE:\n" . $response . "\n";
