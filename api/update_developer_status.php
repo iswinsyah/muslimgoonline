@@ -67,6 +67,6 @@ try {
     }
     http_response_code(500);
     error_log("Update Dev Status Error: " . $e->getMessage());
-    echo json_encode(['message' => 'Gagal memperbarui status pendaftar.']);
+    echo json_encode(['message' => 'Gagal memperbarui status pendaftar: ' . $e->getMessage()]);
 }
 ?>
