@@ -414,8 +414,10 @@ export class SettingsComponent {
 
     startPollingStatus() {
         this.stopPollingStatus();
+        let counter = 0;
         window.waPollingInterval = setInterval(async () => {
             try {
+                // 1. Cek status koneksi
                 const response = await fetch('api/check_whatsapp_status.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -426,9 +428,32 @@ export class SettingsComponent {
                     this.stopPollingStatus();
                     alert('WhatsApp berhasil terhubung! Layanan CS AI kini aktif.');
                     window.location.reload();
+                    return;
+                }
+
+                // 2. Setiap 20 detik (4 x 5 detik), refresh QR Code agar tidak expired
+                counter++;
+                if (counter >= 4) {
+                    counter = 0;
+                    const settings = this.state.developerSettings || {};
+                    const qrRes = await fetch('api/get_whatsapp_qr.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            developer_id: this.state.currentUser.developer_id,
+                            wa_number: settings.wa_number
+                        })
+                    });
+                    const qrResult = await qrRes.json();
+                    if (qrRes.ok && qrResult.qr) {
+                        const img = this.container.querySelector('#wa-connection-actions img');
+                        if (img) {
+                            img.src = qrResult.qr;
+                        }
+                    }
                 }
             } catch (e) {
-                console.error("Polling error:", e);
+                console.error("Polling/Refresh error:", e);
             }
         }, 5000);
     }
