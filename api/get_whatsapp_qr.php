@@ -90,7 +90,7 @@ try {
     // 4. Periksa apakah nomor tersebut sudah terdaftar di daftar device Fonnte
     $listResponse = callFonnte('https://api.fonnte.com/get-devices', FONNTE_ACCOUNT_TOKEN);
     
-    if (isset($listResponse['status']) && $listResponse['status'] === true && !empty($listResponse['data'])) {
+    if (isset($listResponse['data']) && is_array($listResponse['data'])) {
         foreach ($listResponse['data'] as $devItem) {
             if (formatTo62($devItem['device']) === formatTo62($wa_number)) {
                 // Device sudah terdaftar di Fonnte, gunakan token yang ada
