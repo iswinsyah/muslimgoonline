@@ -130,7 +130,11 @@ try {
     // 7. Perbarui URL Webhook untuk device ini agar mengarah ke server kita
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
     $host = $_SERVER['HTTP_HOST'];
-    $webhook_url = $protocol . $host . "/api/whatsapp_webhook.php";
+    if (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false) {
+        $webhook_url = "https://crmprosyariah.online/api/whatsapp_webhook.php";
+    } else {
+        $webhook_url = $protocol . $host . "/api/whatsapp_webhook.php";
+    }
     
     // Panggil update-device menggunakan Device Token dan aktifkan autoread
     callFonnte('https://api.fonnte.com/update-device', $device_token, [
