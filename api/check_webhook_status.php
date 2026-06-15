@@ -18,8 +18,8 @@ $err = curl_error($curl);
 curl_close($curl);
 
 if ($err) {
-    echo json_encode(['error' => $err]);
+    echo "ERROR: " . $err;
 } else {
-    // Return the full decoded response to see webhook field
-    echo $response;
+    $decoded = json_decode($response, true);
+    var_dump($decoded);
 }
