@@ -27,3 +27,4 @@ jobs:
           **/node_modules/**
           **/.git/**
           **/.github/**
+          api/config.php
