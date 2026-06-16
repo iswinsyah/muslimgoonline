@@ -22,7 +22,7 @@ jobs:
         port: 21
         server-dir: ./
         timeout: 300000
-        secure: false
+        security: loose
         exclude: |
           **/node_modules/**
           **/.git/**
