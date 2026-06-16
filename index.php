@@ -98,7 +98,50 @@
                 <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 text-orange-600"><i data-lucide="clock" class="w-10 h-10"></i></div>
                 <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tighter italic">Validasi Pembayaran</h3>
                 <p class="text-sm text-slate-500 font-medium mt-4 leading-relaxed">Akun Anda sedang dalam proses verifikasi oleh tim Super Admin. Mohon tunggu maksimal 1x24 jam.</p>
-                <button onclick="location.reload()" class="mt-8 w-full py-4 bg-[#2845D6] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all">Cek Status Sekarang</button>
+                <div class="flex space-x-3 mt-8">
+                    <button id="btn-logout-pending" class="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest">Keluar</button>
+                    <button onclick="location.reload()" class="flex-2 w-full py-4 bg-[#2845D6] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all">Cek Status</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- INACTIVE OVERLAY (Untuk Tenant yang habis masa aktif / terblokir / ditolak) -->
+        <div id="inactive-overlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[290] hidden flex items-center justify-center p-4 overflow-y-auto custom-scrollbar">
+            <div class="bg-white p-6 md:p-10 rounded-[3rem] shadow-2xl max-w-xl w-full text-center my-8 animate-in zoom-in-95 duration-500">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600"><i data-lucide="shield-alert" class="w-8 h-8"></i></div>
+                <h3 class="text-xl md:text-2xl font-black text-slate-800 uppercase tracking-tighter italic leading-none">Masa Aktif Berakhir</h3>
+                <p class="text-xs text-slate-500 font-bold mt-2 uppercase tracking-wider">LAYANAN DINONAKTIFKAN SEMENTARA</p>
+                
+                <!-- Rejected Alert Box (Dynamically shown) -->
+                <div id="rejected-alert" class="hidden bg-red-50 text-red-700 border border-red-200 p-4 rounded-2xl text-left text-xs mt-4">
+                    <p class="font-bold">❌ Konfirmasi Pembayaran Ditolak:</p>
+                    <p id="rejected-reason" class="mt-1 italic">Bukti transfer tidak terbaca.</p>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-2xl border text-left mt-6 space-y-2 text-xs">
+                    <p class="font-bold text-slate-700">Silakan lakukan pembayaran langganan bulanan sebesar:</p>
+                    <p class="text-xl font-black text-[#F8843F] mb-3">Rp <span id="inactive-billing-amount">150.000</span></p>
+                    <div class="border-t pt-3 space-y-1 text-[11px] text-slate-600">
+                        <p>🏦 Bank Tujuan: **Bank Mandiri / BSI**</p>
+                        <p>💳 No Rekening: **123-456-7890**</p>
+                        <p>👤 Atas Nama: **MuslimGo Online**</p>
+                    </div>
+                </div>
+
+                <form id="inactivePaymentForm" class="mt-6 text-left space-y-4">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Jumlah Transfer (Rp)</label>
+                        <input required type="number" id="inactive-pay-amount" name="amount" class="w-full bg-slate-50 border p-3 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-[#2845D6]" placeholder="Contoh: 150000" />
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Foto Bukti Transfer (.png / .jpg / .jpeg)</label>
+                        <input required type="file" name="payment_proof" accept="image/*" class="w-full bg-slate-50 border p-2 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-[#2845D6]" />
+                    </div>
+                    <div class="flex space-x-2 pt-2">
+                        <button type="button" id="btn-logout-inactive" class="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-widest">Logout</button>
+                        <button type="submit" class="flex-2 w-full py-3 bg-[#2845D6] text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg active:scale-95 transition-all">Kirim Konfirmasi</button>
+                    </div>
+                </form>
             </div>
         </div>
 

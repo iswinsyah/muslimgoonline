@@ -12,7 +12,7 @@ if (!$developer_id) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT id, nama_perusahaan, company_slug, app_name, notification_email, logo_url, maintenance_mode, ai_persona_insight, ai_content_calendar, ai_creative_caption, ai_creative_visual, ai_creative_video, wa_number, ai_cs_instruction, fonnte_token, theme_color, sidebar_color FROM developers WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT id, nama_perusahaan, company_slug, app_name, notification_email, logo_url, maintenance_mode, ai_persona_insight, ai_content_calendar, ai_creative_caption, ai_creative_visual, ai_creative_video, wa_number, ai_cs_instruction, fonnte_token, theme_color, sidebar_color, status_langganan, billing_due_date, billing_amount FROM developers WHERE id = ?");
     $stmt->execute([$developer_id]);
     $settings = $stmt->fetch(PDO::FETCH_ASSOC);
 

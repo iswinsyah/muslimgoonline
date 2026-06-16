@@ -11,12 +11,26 @@ export class ValidationComponent {
     }
 
     async render() {
-        this.container.innerHTML = this.ui.renderLoading('Memuat data pendaftar...');
+        this.container.innerHTML = this.ui.renderLoading('Memuat data validasi...');
         try {
             this.state.pending = await ApiService.getPendingDevelopers();
-            this.container.innerHTML = this.state.pending.length === 0 
-                ? this.renderEmptyState() 
-                : this.renderTable();
+            
+            // Ambil data pembayaran pending
+            let pendingPayments = [];
+            try {
+                const res = await ApiService.get('get_pending_payments.php');
+                pendingPayments = res.data || [];
+            } catch (e) {
+                console.error("Gagal memuat pembayaran pending:", e);
+            }
+            this.state.pendingPayments = pendingPayments;
+
+            this.container.innerHTML = `
+                <div class="space-y-8">
+                    ${this.state.pending.length === 0 ? this.renderEmptyState() : this.renderTable()}
+                    ${this.state.pendingPayments.length === 0 ? this.renderEmptyPaymentsState() : this.renderPaymentsTable()}
+                </div>
+            `;
             this.attachEventListeners();
         } catch (error) {
             this.container.innerHTML = this.ui.renderError('Gagal memuat data validasi.');
@@ -30,6 +44,16 @@ export class ValidationComponent {
                 <i data-lucide="check-check" class="w-16 h-16 mx-auto text-green-500"></i>
                 <h3 class="mt-4 text-lg font-bold text-slate-700">Tidak Ada Pendaftar Baru</h3>
                 <p class="mt-1 text-sm text-slate-500">Semua pendaftaran sudah divalidasi.</p>
+            </div>
+        `;
+    }
+
+    renderEmptyPaymentsState() {
+        return `
+            <div class="text-center p-10 bg-white rounded-2xl shadow-md">
+                <i data-lucide="wallet" class="w-16 h-16 mx-auto text-green-500"></i>
+                <h3 class="mt-4 text-lg font-bold text-slate-700">Tidak Ada Tagihan Pending</h3>
+                <p class="mt-1 text-sm text-slate-500">Semua konfirmasi transfer pembayaran bulanan sudah diproses.</p>
             </div>
         `;
     }
@@ -85,9 +109,58 @@ export class ValidationComponent {
         `;
     }
 
+    renderPaymentsTable() {
+        const rows = this.state.pendingPayments.map(pay => `
+            <tr class="border-b hover:bg-slate-50/50 transition-colors" data-payment-id="${pay.id}">
+                <td class="p-4 font-bold text-slate-700">${pay.nama_perusahaan}</td>
+                <td class="p-4 font-black text-slate-700">Rp ${parseFloat(pay.amount).toLocaleString('id-ID')}</td>
+                <td class="p-4 text-slate-500 text-xs">${new Date(pay.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} WIB</td>
+                <td class="p-4">
+                    <a href="${pay.payment_proof}" target="_blank" class="text-xs font-bold text-blue-600 hover:underline flex items-center">
+                        <i data-lucide="image" class="w-4 h-4 mr-1"></i> Lihat Struk
+                    </a>
+                </td>
+                <td class="p-4">
+                    <input type="text" placeholder="Alasan penolakan..." class="reject-notes-input w-full p-2 border rounded-lg text-xs shadow-sm focus:ring-1 focus:ring-red-500 outline-none" />
+                </td>
+                <td class="p-4 flex items-center space-x-2">
+                    <button data-action="approve-payment" class="action-payment-btn bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold flex items-center shadow-md transition-all">
+                        <i data-lucide="check" class="w-4 h-4 mr-1"></i> Terima
+                    </button>
+                    <button data-action="reject-payment" class="action-payment-btn bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-xs font-bold flex items-center shadow-md transition-all">
+                        <i data-lucide="x" class="w-4 h-4 mr-1"></i> Tolak
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+        return `
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-md mt-6">
+                <h2 class="text-xl font-black text-slate-800 uppercase tracking-wider">Validasi Pembayaran Bulanan</h2>
+                <p class="text-sm text-slate-500 mt-1">Verifikasi bukti transfer biaya langganan bulanan dari para tenant.</p>
+                <div class="overflow-x-auto mt-6">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-50 text-xs text-slate-500 uppercase font-black tracking-wider">
+                            <tr>
+                                <th class="p-4">Nama Perusahaan</th>
+                                <th class="p-4">Nominal</th>
+                                <th class="p-4">Tanggal Kirim</th>
+                                <th class="p-4">Bukti Transfer</th>
+                                <th class="p-4">Catatan (Bila Ditolak)</th>
+                                <th class="p-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
     attachEventListeners() {
         if (window.lucide) window.lucide.createIcons();
 
+        // Event listener pendaftaran baru
         this.container.querySelectorAll('.action-btn').forEach(button => {
             button.addEventListener('click', async (e) => {
                 const btn = e.currentTarget;
@@ -110,7 +183,6 @@ export class ValidationComponent {
                 if (window.lucide) window.lucide.createIcons();
 
                 try {
-                    // Update API Service call to include token and wa
                     const response = await ApiService.post('update_developer_status.php', {
                         developer_id: developerId,
                         status: status,
@@ -120,21 +192,66 @@ export class ValidationComponent {
 
                     this.ui.showToast(response.message);
                     
-                    // Remove the row from the UI
                     row.style.transition = 'opacity 0.5s';
                     row.style.opacity = '0';
                     setTimeout(() => {
                         row.remove();
-                        if (this.container.querySelector('tbody').children.length === 0) {
-                            this.container.innerHTML = this.renderEmptyState();
-                            if (window.lucide) window.lucide.createIcons();
-                        }
+                        this.render();
                     }, 500);
 
                 } catch (error) {
                     this.ui.showToast(`Gagal: ${error.message}`, 'error');
                     btn.disabled = false;
                     btn.innerHTML = `<i data-lucide="${action === 'approve' ? 'check' : 'x'}" class="w-4 h-4"></i>`;
+                    if (window.lucide) window.lucide.createIcons();
+                }
+            });
+        });
+
+        // Event listener pembayaran bulanan
+        this.container.querySelectorAll('.action-payment-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const btn = e.currentTarget;
+                const row = btn.closest('tr');
+                const paymentId = row.dataset.paymentId;
+                const actionType = btn.dataset.action;
+                const action = actionType === 'approve-payment' ? 'Approve' : 'Reject';
+                const notes = row.querySelector('.reject-notes-input').value;
+                const companyName = row.querySelector('td').innerText;
+
+                if (action === 'Reject' && !notes.trim()) {
+                    alert('Harap isi alasan penolakan pada kolom catatan.');
+                    return;
+                }
+
+                if (!confirm(`Apakah Anda yakin ingin ${action === 'Approve' ? 'menyetujui' : 'menolak'} pembayaran dari "${companyName}"?`)) {
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
+                if (window.lucide) window.lucide.createIcons();
+
+                try {
+                    const response = await ApiService.post('verify_payment.php', {
+                        payment_id: paymentId,
+                        action: action,
+                        notes: notes
+                    });
+
+                    this.ui.showToast(response.message);
+
+                    row.style.transition = 'opacity 0.5s';
+                    row.style.opacity = '0';
+                    setTimeout(() => {
+                        row.remove();
+                        this.render();
+                    }, 500);
+
+                } catch (error) {
+                    this.ui.showToast(`Gagal: ${error.message}`, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = `<i data-lucide="${action === 'Approve' ? 'check' : 'x'}" class="w-4 h-4"></i>`;
                     if (window.lucide) window.lucide.createIcons();
                 }
             });

@@ -215,18 +215,87 @@ if (!loggedInUser) {
             `;
         }
 
-        // Cek Validasi Pembayaran (Hanya untuk non-Super Admin)
-        if (state.currentRole !== 'Super Admin' && status_langganan === 'Pending') {
+        // Cek Status Langganan & Pembayaran (Hanya untuk non-Super Admin)
+        if (state.currentRole !== 'Super Admin') {
             const pendingOverlay = document.querySelector('#pending-overlay');
-            if (pendingOverlay) {
-                // Jangan tampilkan full-screen overlay jika sedang membuka settings
-                if (state.currentTab === 'settings') {
-                    pendingOverlay.classList.add('hidden');
-                } else {
+            const inactiveOverlay = document.querySelector('#inactive-overlay');
+            const rejectedAlert = document.getElementById('rejected-alert');
+            const btnAdd = document.getElementById('btn-add-lead');
+
+            // Sembunyikan semua overlay secara default
+            if (pendingOverlay) pendingOverlay.classList.add('hidden');
+            if (inactiveOverlay) inactiveOverlay.classList.add('hidden');
+
+            if (status_langganan === 'Pending') {
+                if (pendingOverlay && state.currentTab !== 'settings') {
                     pendingOverlay.classList.remove('hidden');
                 }
-                const btnAdd = document.getElementById('btn-add-lead');
                 if (btnAdd) btnAdd.style.display = 'none';
+            } 
+            else if (status_langganan === 'Inactive' || status_langganan === 'Rejected') {
+                if (inactiveOverlay) {
+                    inactiveOverlay.classList.remove('hidden');
+                    
+                    // Set nominal billing pada dialog
+                    const billingAmountSpan = document.getElementById('inactive-billing-amount');
+                    if (billingAmountSpan && state.developerSettings.billing_amount) {
+                        const amountFormatted = parseFloat(state.developerSettings.billing_amount).toLocaleString('id-ID');
+                        billingAmountSpan.innerText = amountFormatted;
+                    }
+
+                    // Tampilkan detail penolakan jika statusnya Rejected
+                    if (status_langganan === 'Rejected') {
+                        if (rejectedAlert) {
+                            rejectedAlert.classList.remove('hidden');
+                            const rejectedReason = document.getElementById('rejected-reason');
+                            if (rejectedReason) {
+                                rejectedReason.innerText = "Bukti transfer ditolak oleh Admin. Silakan periksa struk Anda dan upload ulang bukti transfer yang valid.";
+                            }
+                        }
+                    } else {
+                        if (rejectedAlert) rejectedAlert.classList.add('hidden');
+                    }
+                }
+                if (btnAdd) btnAdd.style.display = 'none';
+            }
+
+            // Tambahkan banner peringatan H-3 jika status Active namun billing_due_date dekat
+            if (status_langganan === 'Active' && state.developerSettings.billing_due_date) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const dueDate = new Date(state.developerSettings.billing_due_date);
+                dueDate.setHours(0, 0, 0, 0);
+                
+                const timeDiff = dueDate.getTime() - today.getTime();
+                const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                
+                const alertContainerId = 'billing-warning-banner';
+                let alertBanner = document.getElementById(alertContainerId);
+                
+                if (diffDays >= 0 && diffDays <= 3) {
+                    if (!alertBanner) {
+                        alertBanner = document.createElement('div');
+                        alertBanner.id = alertContainerId;
+                        alertBanner.className = 'bg-orange-50 border-b border-orange-200 text-orange-800 text-[10px] md:text-xs font-bold p-3 text-center flex items-center justify-center gap-2 animate-in slide-in-from-top duration-300 w-full shrink-0 z-10';
+                        const formattedDue = dueDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                        alertBanner.innerHTML = `
+                            <div class="flex items-center justify-center gap-2">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 text-orange-600 shrink-0"></i>
+                                <span>Layanan Anda berakhir dalam <strong>${diffDays} hari</strong> (Jatuh tempo: <strong>${formattedDue}</strong>). Silakan lakukan transfer perpanjangan segera.</span>
+                            </div>
+                        `;
+                        // Insert alertBanner di bawah header
+                        const headerElement = document.querySelector('header');
+                        if (headerElement) {
+                            headerElement.after(alertBanner);
+                        } else {
+                            document.getElementById('main-content').prepend(alertBanner);
+                        }
+                        if (window.lucide) window.lucide.createIcons();
+                    }
+                } else {
+                    if (alertBanner) alertBanner.remove();
+                }
             }
         }
     }
@@ -264,6 +333,52 @@ if (!loggedInUser) {
         document.getElementById('btn-logout').addEventListener('click', logout);
         const sidebarLogoutBtn = document.getElementById('btn-logout-sidebar');
         if (sidebarLogoutBtn) sidebarLogoutBtn.addEventListener('click', logout);
+        
+        // Log out dari overlay pending & inactive
+        const pendingLogoutBtn = document.getElementById('btn-logout-pending');
+        if (pendingLogoutBtn) pendingLogoutBtn.addEventListener('click', logout);
+        const inactiveLogoutBtn = document.getElementById('btn-logout-inactive');
+        if (inactiveLogoutBtn) inactiveLogoutBtn.addEventListener('click', logout);
+
+        // Submit handler untuk konfirmasi pembayaran di halaman blokir
+        const inactiveForm = document.getElementById('inactivePaymentForm');
+        if (inactiveForm) {
+            inactiveForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btnSubmit = e.target.querySelector('button[type="submit"]');
+                const originalText = btnSubmit.innerText;
+                
+                try {
+                    btnSubmit.innerText = "Mengirim...";
+                    btnSubmit.disabled = true;
+
+                    const formData = new FormData(e.target);
+                    formData.append('developer_id', state.currentUser.developer_id);
+
+                    const response = await fetch('api/create_payment_confirmation.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const resJson = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(resJson.message || 'Gagal mengirim konfirmasi.');
+                    }
+                    
+                    alert("Sukses! Konfirmasi pembayaran Anda berhasil dikirim dan akan segera diproses oleh Super Admin.");
+                    location.reload();
+
+                } catch (error) {
+                    console.error(error);
+                    alert("Gagal: " + error.message);
+                } finally {
+                    btnSubmit.innerText = originalText;
+                    btnSubmit.disabled = false;
+                }
+            });
+        }
+
         document.getElementById('btn-add-lead').addEventListener('click', () => {
             injectAddLeadModal();
             ui.openModal('addLeadModal');
