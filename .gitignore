@@ -4,4 +4,3 @@
 .DS_Store
 Thumbs.db
 node_modules/
-api/config.php
