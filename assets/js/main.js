@@ -808,13 +808,13 @@ if (!loggedInUser) {
                             </div>
                             <div>
                                 <h3 class="text-sm md:text-base font-black uppercase tracking-tighter leading-none">Panduan Menu</h3>
-                                <p class="text-[10px] text-blue-200 font-bold uppercase mt-1.5 tracking-widest leading-none">\${guide.title}</p>
+                                <p class="text-[10px] text-blue-200 font-bold uppercase mt-1.5 tracking-widest leading-none">${guide.title}</p>
                             </div>
                         </div>
                         <button type="button" id="btn-close-guide-modal" class="p-2 hover:bg-white/10 rounded-xl transition-all"><i data-lucide="x" class="w-5 h-5"></i></button>
                     </div>
                     <div class="p-6 md:p-8 space-y-4 overflow-y-auto custom-scrollbar text-xs md:text-sm font-semibold text-slate-600 leading-relaxed">
-                        <p>\${guide.desc}</p>
+                        <p>${guide.desc}</p>
                     </div>
                     <div class="px-6 md:px-8 pb-6 md:pb-8 shrink-0">
                         <button type="button" id="btn-confirm-guide-modal" class="w-full py-3.5 bg-[#2845D6] text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:bg-blue-700 transition-all active:scale-95">Saya Mengerti</button>
