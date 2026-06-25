@@ -44,6 +44,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     const signupForm = document.getElementById('signup-form');
     const signupButton = document.getElementById('btn-signup');
 
+    // --- Terms and Agreement Handlers ---
+    const checkbox = document.getElementById('agreement-checkbox');
+    const termsModal = document.getElementById('terms-modal');
+    const btnShowTerms = document.getElementById('btn-show-terms');
+    const btnCloseTerms = document.getElementById('btn-close-terms');
+    const btnAgreeTerms = document.getElementById('btn-agree-terms');
+
+    if (checkbox && signupButton) {
+        checkbox.addEventListener('change', () => {
+            signupButton.disabled = !checkbox.checked;
+        });
+    }
+
+    if (btnShowTerms && termsModal) {
+        btnShowTerms.addEventListener('click', (e) => {
+            e.preventDefault();
+            termsModal.classList.remove('hidden');
+        });
+    }
+
+    const closeTerms = () => {
+        if (termsModal) termsModal.classList.add('hidden');
+    };
+
+    if (btnCloseTerms) {
+        btnCloseTerms.addEventListener('click', closeTerms);
+    }
+
+    if (btnAgreeTerms) {
+        btnAgreeTerms.addEventListener('click', () => {
+            if (checkbox) checkbox.checked = true;
+            if (signupButton) signupButton.disabled = false;
+            closeTerms();
+        });
+    }
+
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const originalButtonText = signupButton.innerHTML;
