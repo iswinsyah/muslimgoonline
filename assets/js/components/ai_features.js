@@ -15,7 +15,7 @@ export class LeadAnalyzerComponent {
             <div class="max-w-4xl mx-auto space-y-6 md:space-y-8">
                 <div class="bg-white p-6 md:p-10 rounded-[2rem] shadow-sm border border-slate-200 text-center">
                     <div class="flex items-center justify-center mb-4 md:mb-6"><i data-lucide="brain-circuit" class="w-8 h-8 md:w-10 md:h-10 text-teal-600"></i></div>
-                    <h3 class="text-sm md:text-lg font-black text-slate-800 uppercase tracking-widest italic mb-4 md:mb-6">Lead Gestur Analyzer AI <span class="text-[9px] bg-blue-100 text-blue-600 px-2 py-1 rounded-full not-italic ml-2">Powered by Gemini</span></h3>
+                    <h3 class="text-sm md:text-lg font-black text-slate-800 uppercase tracking-widest italic mb-4 md:mb-6">Lead Gestur Analyzer AI <span class="text-[9px] bg-blue-100 text-blue-600 px-2 py-1 rounded-full not-italic ml-2">Powered by MGO AI</span></h3>
                     <textarea id="analyzer-input" placeholder="Tempel percakapan chat WA prospek di sini..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 text-xs md:text-sm font-medium h-40 md:h-48 outline-none focus:ring-2 focus:ring-teal-500 resize-none shadow-inner custom-scrollbar"></textarea>
                     <button id="btn-analyze" class="w-full mt-4 md:mt-6 py-4 md:py-5 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl font-black text-xs uppercase shadow-xl active:scale-95 transition-all">Analisa Suhu Prospek</button>
                 </div>
@@ -292,7 +292,7 @@ export class ObjectionGenComponent {
         this.container.innerHTML = `
             <div class="max-w-4xl mx-auto space-y-6 md:space-y-8">
                 <div class="bg-white p-6 md:p-10 rounded-[2rem] border border-slate-200 shadow-sm">
-                    <h3 class="text-xs md:text-sm font-black text-slate-800 mb-6 uppercase tracking-widest text-center italic">Handling Objection Master AI <span class="text-[9px] bg-blue-100 text-blue-600 px-2 py-1 rounded-full not-italic ml-2">Gemini</span></h3>
+                    <h3 class="text-xs md:text-sm font-black text-slate-800 mb-6 uppercase tracking-widest text-center italic">Handling Objection Master AI <span class="text-[9px] bg-blue-100 text-blue-600 px-2 py-1 rounded-full not-italic ml-2">MGO AI</span></h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                         ${this.btn('mahal', 'Harganya kemahalan pak...')}
                         ${this.btn('legal', 'Gimana legalitasnya, aman?')}
@@ -399,7 +399,7 @@ export class PersonaInsightComponent {
                             </div>
                             <div>
                                 <h4 class="font-black text-slate-800 text-lg uppercase tracking-widest">AI Buyer Persona</h4>
-                                <p class="text-[10px] text-slate-400 font-bold">Powered by Gemini Pro</p>
+                                <p class="text-[10px] text-slate-400 font-bold">Powered by MGO AI</p>
                             </div>
                         </div>
                         <div id="persona-content" class="text-xs md:text-sm text-slate-600 leading-relaxed font-medium space-y-2"></div>

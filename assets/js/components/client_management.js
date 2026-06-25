@@ -120,7 +120,7 @@ export class ClientManagementComponent {
                         <!-- Stats Grid -->
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-teal-50 p-4 rounded-2xl border border-teal-100">
-                                <p class="text-[9px] font-bold text-teal-600 uppercase tracking-widest">Total Token Gemini</p>
+                                <p class="text-[9px] font-bold text-teal-600 uppercase tracking-widest">Total Token AI</p>
                                 <h4 class="text-2xl font-black text-teal-800 mt-1" id="stat-total-gemini">0</h4>
                                 <p class="text-[8px] text-teal-500 mt-1 font-mono" id="stat-gemini-detail">Prompt: 0 | Completion: 0</p>
                             </div>
@@ -136,7 +136,7 @@ export class ClientManagementComponent {
                             <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Kalkulator Tarif Tagihan</h4>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="text-[9px] font-bold text-slate-400 uppercase">Tarif per 1K Token Gemini (Rp)</label>
+                                    <label class="text-[9px] font-bold text-slate-400 uppercase">Tarif per 1K Token AI (Rp)</label>
                                     <input type="number" id="rate-gemini" value="200" class="w-full mt-1 bg-white border p-2.5 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-[#2845D6]" />
                                 </div>
                                 <div>
@@ -159,7 +159,7 @@ export class ClientManagementComponent {
                                         <tr>
                                             <th class="p-3">Fitur</th>
                                             <th class="p-3 text-right">Panggilan</th>
-                                            <th class="p-3 text-right">Token Gemini</th>
+                                            <th class="p-3 text-right">Token AI</th>
                                             <th class="p-3 text-right">WhatsApp Sent</th>
                                         </tr>
                                     </thead>
