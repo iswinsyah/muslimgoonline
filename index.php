@@ -72,6 +72,9 @@
                         <i data-lucide="zap" class="w-3 h-3 md:w-4 md:h-4 mr-2 text-[#2845D6] shrink-0"></i> 
                         <span id="header-title-text" class="truncate">PIPELINE</span>
                     </h2>
+                    <button id="btn-menu-guide" class="ml-2.5 p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all shrink-0 animate-pulse" title="Panduan / Tutorial Menu">
+                        <i data-lucide="help-circle" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
+                    </button>
                 </div>
                 <div class="flex space-x-2 md:space-x-3 shrink-0">
                     <button id="btn-logout" class="bg-red-50 text-red-700 border border-red-100 px-3 md:px-4 py-2 rounded-xl text-[9px] font-black uppercase shadow-sm flex items-center transition-all active:scale-95 hover:bg-red-100">

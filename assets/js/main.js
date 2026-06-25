@@ -383,6 +383,12 @@ if (!loggedInUser) {
             injectAddLeadModal();
             ui.openModal('addLeadModal');
         });
+        const btnGuide = document.getElementById('btn-menu-guide');
+        if (btnGuide) {
+            btnGuide.addEventListener('click', () => {
+                injectMenuGuideModal(state.currentTab);
+            });
+        }
         document.addEventListener('lead-selected', (e) => {
             ui.openDrawer(e.detail, state.currentRole);
         });
@@ -728,5 +734,108 @@ if (!loggedInUser) {
             { menu_id: 'ai-engine', label: 'AI Engine Config', icon: 'database', roles: ['Super Admin'] }
         ];
         return allMenus.filter(menu => menu.roles.includes('All') || menu.roles.includes(role));
+    }
+
+    const menuGuides = {
+        'pipeline': {
+            title: 'Lead & Pipeline',
+            desc: 'Menu ini diperuntukkan untuk memasukkan data lead yang didapat baik via WhatsApp, DM media sosial, maupun kontak secara langsung. Silakan klik tombol <strong>+ ADD LEAD</strong> berwarna biru di pojok kanan atas. Anda akan disuguhi kotak dialog berupa formulir data lead. Isi data calon konsumen mulai dari Nama, NIK 16 digit, WhatsApp, Pekerjaan, Media Masuk, hingga Segmen Prospek sesuai kolom yang ada, kemudian tekan tombol <strong>Daftarkan Lead</strong>. Setelah data berhasil didaftarkan, data lead Anda akan ditampilkan di daftar kolom pipeline. Anda dapat melakukan <em>drag-and-drop</em> atau menggeser kartu prospek tersebut ke kolom status yang sesuai (seperti <em>New Lead, Contacted, Survei,</em> hingga <em>Closing</em>) agar mempermudah Anda dalam mengetahui posisi terakhir negosiasi lead tersebut.'
+        },
+        'ai-lead': {
+            title: 'Lead Analyzer (AI)',
+            desc: 'Menu ini diperuntukkan untuk menganalisis isi obrolan dengan calon konsumen guna mengetahui psikologi, minat, dan tingkat ketertarikan mereka. Salin atau <em>copy-paste</em> seluruh teks percakapan terakhir Anda dengan calon pembeli dari WhatsApp ke dalam kolom input yang disediakan. Setelah itu, pilih model AI yang ingin digunakan lalu klik tombol <strong>Mulai Analisis</strong>. AI akan memproses teks tersebut dan menampilkan hasil analisis mendalam. Anda dapat melihat apakah prospek Anda berstatus <em>Cold, Warm,</em> atau <em>Hot</em>, disertai dengan analisis psikologis, rekomendasi produk properti yang cocok, serta draf teks balasan yang persuasif untuk dikirim kembali ke calon konsumen agar mempermudah proses closing.'
+        },
+        'ai-objection': {
+            title: 'Objection Generator (AI)',
+            desc: 'Menu ini diperuntukkan untuk membantu tim sales atau CS dalam merancang jawaban terbaik ketika calon konsumen menyampaikan keberatan tertentu dalam proses negosiasi. Ketikkan secara detail apa yang menjadi alasan atau keberatan dari calon konsumen (misalnya: <em>"Harga unit properti kemahalan"</em> atau <em>"Lokasinya terlalu jauh"</em>). Setelah mengisi kolom keberatan tersebut, klik tombol <strong>Hasilkan Jawaban</strong>. AI akan segera merancang 3 alternatif kalimat jawaban syariah yang santun, solutif, dan tetap persuasif. Anda cukup memilih salah satu jawaban yang paling pas, klik salin, lalu kirimkan pesan tersebut langsung ke WhatsApp calon konsumen Anda.'
+        },
+        'tasks': {
+            title: 'Task Manager',
+            desc: 'Menu ini diperuntukkan untuk mencatat dan mengatur jadwal kerja atau tugas-tugas harian Anda agar tidak ada tindak lanjut (follow-up) konsumen yang terlewat. Klik tombol tambah tugas baru. Isi formulir tugas mulai dari Judul Tugas (misalnya: <em>"Kirim brosur tipe 45"</em>), berikan deskripsi tambahan jika diperlukan, tentukan tanggal serta jam tenggat waktunya, lalu hubungkan tugas tersebut ke salah satu nama lead Anda. Klik simpan untuk memasukkan tugas ke daftar tugas. Jika Anda telah selesai mengerjakan tugas tersebut, cukup klik ikon centang pada tugas yang bersangkutan untuk menandai tugas tersebut telah selesai.'
+        },
+        'calendar': {
+            title: 'Calendar',
+            desc: 'Menu ini diperuntukkan untuk memantau semua agenda, janji temu, dan jadwal survei lokasi perumahan secara visual dalam bentuk kalender terpadu. Di sini Anda akan melihat visualisasi kalender bulanan lengkap dengan kotak-kotak jadwal yang berwarna-warni. Setiap kotak mewakili tugas aktif atau jadwal survei yang telah Anda buat di Task Manager. Anda cukup mengklik pada salah satu tanggal untuk melihat rincian detail tugas apa saja yang harus diselesaikan pada hari itu, sehingga perencanaan jadwal kerja harian Anda menjadi lebih efisien dan terarah.'
+        },
+        'reporting': {
+            title: 'Weekly Report',
+            desc: 'Menu ini diperuntukkan untuk melihat ringkasan statistik perkembangan prospek dan kinerja penjualan tim secara berkala. Di halaman ini, Anda akan disuguhi diagram dan grafik interaktif yang menampilkan jumlah prospek masuk, tingkat konversi dari <em>Lead</em> ke <em>Closing</em>, serta statistik media promosi mana saja yang menyumbang pembeli terbanyak. Data ini sangat berguna bagi tim CS untuk menyusun laporan mingguan dan membantu Developer dalam mengevaluasi efektivitas iklan perumahan Anda.'
+        },
+        'persona': {
+            title: 'Buyer Persona (AI)',
+            desc: 'Menu ini diperuntukkan untuk menganalisis profil psikologis calon konsumen agar Anda dapat menerapkan pendekatan penjualan yang tepat sasaran. Pilih salah satu segmen calon pembeli yang ingin Anda analisis (misalnya: <em>Karyawan Mapan</em> atau <em>Pasangan Baru Menikah</em>), kemudian tekan tombol analisis. AI akan memaparkan profil psikologis mereka secara lengkap, mulai dari apa ketakutan terbesar mereka, keinginan terdalam tentang kepemilikan rumah, hingga kata-kata kunci promosi yang paling menarik minat mereka untuk membeli unit properti Anda.'
+        },
+        'ai-content-calendar': {
+            title: 'AI Content Calendar',
+            desc: 'Menu ini diperuntukkan untuk menyusun jadwal ide postingan dan copywriting promosi di media sosial secara otomatis selama 30 hari penuh. Pada kolom formulir, masukkan nama perumahan Anda beserta target pasarnya, lalu klik tombol susun kalender. Sistem AI akan otomatis menghasilkan tabel jadwal konten bulanan lengkap untuk Anda. Anda akan mendapatkan ide visual foto atau video, draf caption promosi WhatsApp/Instagram, serta tagar yang relevan untuk setiap harinya selama sebulan penuh.'
+        },
+        'ai-creative': {
+            title: 'Creative Suite (AI)',
+            desc: 'Menu ini diperuntukkan untuk membuat materi iklan promosi properti secara instan, mulai dari draf tulisan promosi (<em>copywriting</em>) hingga ide skrip video pendek. Di sini terdapat beberapa tab pilihan seperti <em>Caption</em> dan <em>Video Script</em>. Tuliskan informasi singkat atau keunggulan dari unit perumahan Anda, lalu tekan tombol proses. AI akan langsung membuatkan naskah copywriting promosi yang persuasif lengkap dengan emoji-emoji menarik yang siap Anda gunakan untuk iklan media sosial atau broadcast WhatsApp.'
+        },
+        'team-management': {
+            title: 'Team Management',
+            desc: 'Menu ini diperuntukkan bagi pemilik perumahan atau Developer untuk mengelola akun staf admin CS dan agent freelance yang bekerja di bawah naungannya. Di halaman ini, Anda dapat melihat daftar seluruh anggota tim Anda. Untuk menambahkan anggota baru, klik tombol tambah anggota, isi nama lengkap staf, nomor WhatsApp, serta buatkan username dan password khusus untuk mereka login. Tentukan pula perannya sebagai <em>Admin CS</em> atau <em>Agent Freelance</em>. Staf Anda sekarang dapat menggunakan akun tersebut untuk masuk ke sistem, dan Anda dapat menonaktifkan akses akun mereka kapan saja jika diperlukan.'
+        },
+        'settings': {
+            title: 'Setting',
+            desc: 'Menu ini diperuntukkan bagi Developer untuk menyesuaikan identitas aplikasi agar sesuai dengan brand perumahan sendiri serta melakukan integrasi WhatsApp. Di bagian <em>Branding</em>, Anda dapat mengunggah logo perumahan Anda dan menentukan warna tema sidebar aplikasi. Di bagian <em>WhatsApp Integration</em>, Anda dapat memasukkan token Fonnte Anda, menulis instruksi persona Bot AI Anda (misalnya asisten cerdas yang ramah dan siap melayani), kemudian hubungkan nomor WhatsApp operasional Anda dengan memindai kode QR yang muncul. Setelah terhubung, asisten otomatis cerdas AI Anda akan langsung aktif menjawab pertanyaan calon pembeli 24 jam non-stop.'
+        },
+        'buyer-list': {
+            title: 'Daftar Buyer',
+            desc: 'Menu ini diperuntukkan untuk melihat database riwayat seluruh calon konsumen yang transaksinya telah dinyatakan sukses atau <em>Closed/Selesai</em> oleh tim penjualan Anda. Di sini, terkumpul daftar lengkap nama konsumen yang telah membeli unit properti di perumahan Anda. Database ini sangat penting untuk arsip internal developer, pengelolaan data sertifikat/legalitas, serta sebagai target pasar utama untuk program loyalitas pelanggan atau penawaran proyek properti baru Anda di masa mendatang.'
+        }
+    };
+
+    function injectMenuGuideModal(tabId) {
+        const guide = menuGuides[tabId] || {
+            title: tabId.replace('-', ' ').toUpperCase(),
+            desc: 'Panduan untuk menu ini belum tersedia atau sedang dikembangkan.'
+        };
+        
+        let modal = document.getElementById('menuGuideModal');
+        if (modal) {
+            modal.remove();
+        }
+        
+        const modalHTML = `
+            <div id="menuGuideModal" class="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+                <div class="bg-white w-full max-w-lg rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95">
+                    <div class="bg-[#2845D6] p-5 md:p-8 text-white flex justify-between items-center shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-white/10 rounded-xl">
+                                <i data-lucide="help-circle" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm md:text-base font-black uppercase tracking-tighter leading-none">Panduan Menu</h3>
+                                <p class="text-[10px] text-blue-200 font-bold uppercase mt-1.5 tracking-widest leading-none">\${guide.title}</p>
+                            </div>
+                        </div>
+                        <button type="button" id="btn-close-guide-modal" class="p-2 hover:bg-white/10 rounded-xl transition-all"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    </div>
+                    <div class="p-6 md:p-8 space-y-4 overflow-y-auto custom-scrollbar text-xs md:text-sm font-semibold text-slate-600 leading-relaxed">
+                        <p>\${guide.desc}</p>
+                    </div>
+                    <div class="px-6 md:px-8 pb-6 md:pb-8 shrink-0">
+                        <button type="button" id="btn-confirm-guide-modal" class="w-full py-3.5 bg-[#2845D6] text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg hover:bg-blue-700 transition-all active:scale-95">Saya Mengerti</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const div = document.createElement('div');
+        div.id = 'guide-modal-container';
+        div.innerHTML = modalHTML;
+        document.body.appendChild(div);
+        
+        const closeGuide = () => {
+            const m = document.getElementById('menuGuideModal');
+            if (m) m.closest('#guide-modal-container').remove();
+        };
+        
+        document.getElementById('btn-close-guide-modal').addEventListener('click', closeGuide);
+        document.getElementById('btn-confirm-guide-modal').addEventListener('click', closeGuide);
+        
+        if (window.lucide) window.lucide.createIcons();
     }
 }
