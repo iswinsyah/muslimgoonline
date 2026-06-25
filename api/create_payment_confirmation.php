@@ -53,7 +53,6 @@ try {
     $pdo->commit();
 
     // 5. Kirim Notifikasi WA ke Super Admin
-    $target_admin = defined('SUPER_ADMIN_WA') ? SUPER_ADMIN_WA : '62895808626677';
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
     $host = $_SERVER['HTTP_HOST'];
     $link_bukti = $protocol . $host . $db_file_path;
@@ -67,7 +66,10 @@ try {
              . "🔗 Bukti: {$link_bukti}\n"
              . "🔗 Validasi: {$link_admin}";
 
-    sendWA($target_admin, $message);
+    $admin_numbers = ['62895808626677', '6281110240001'];
+    foreach ($admin_numbers as $target_admin) {
+        sendWA($target_admin, $message);
+    }
 
     echo json_encode([
         'status' => 'success',

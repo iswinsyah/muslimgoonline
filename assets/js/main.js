@@ -272,7 +272,7 @@ if (!loggedInUser) {
                 const alertContainerId = 'billing-warning-banner';
                 let alertBanner = document.getElementById(alertContainerId);
                 
-                if (diffDays >= 0 && diffDays <= 3) {
+                if (diffDays >= 0 && diffDays <= 5) {
                     if (!alertBanner) {
                         alertBanner = document.createElement('div');
                         alertBanner.id = alertContainerId;

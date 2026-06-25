@@ -20,6 +20,38 @@ if (!$developer_id || !in_array($new_status, ['Active', 'Inactive', 'Pending', '
     exit;
 }
 
+// Fungsi untuk menghitung tanggal jatuh tempo berikutnya yang selalu jatuh pada tanggal 30
+function getNext30thDate($currentDueStr = null) {
+    $today = new DateTime('today');
+    
+    if ($currentDueStr) {
+        $currentDue = new DateTime($currentDueStr);
+        if ($currentDue >= $today) {
+            $nextDue = clone $currentDue;
+            $nextDue->modify('+1 month');
+            $year = $nextDue->format('Y');
+            $month = $nextDue->format('m');
+            $day = ($month == '02') ? (date('L', mktime(0,0,0,1,1,$year)) ? '29' : '28') : '30';
+            return "$year-$month-$day";
+        }
+    }
+    
+    $year = $today->format('Y');
+    $month = $today->format('m');
+    $dayOfToday = (int)$today->format('d');
+    
+    if ($dayOfToday < 25) {
+        $day = ($month == '02') ? (date('L', mktime(0,0,0,1,1,$year)) ? '29' : '28') : '30';
+        return "$year-$month-$day";
+    } else {
+        $today->modify('+1 month');
+        $year = $today->format('Y');
+        $month = $today->format('m');
+        $day = ($month == '02') ? (date('L', mktime(0,0,0,1,1,$year)) ? '29' : '28') : '30';
+        return "$year-$month-$day";
+    }
+}
+
 try {
     $pdo->beginTransaction();
 
@@ -61,8 +93,20 @@ try {
     }
 
     // 1. Update status di tabel developers
-    $stmtDev = $pdo->prepare("UPDATE developers SET status_langganan = ?, fonnte_token = ?, wa_number = ? WHERE id = ?");
-    $stmtDev->execute([$new_status, $fonnte_token, $wa_number, $developer_id]);
+    if ($new_status === 'Active') {
+        $stmtCheckDue = $pdo->prepare("SELECT billing_due_date FROM developers WHERE id = ?");
+        $stmtCheckDue->execute([$developer_id]);
+        $devRow = $stmtCheckDue->fetch();
+        $billing_due_date = $devRow['billing_due_date'] ?? null;
+        if (empty($billing_due_date)) {
+            $billing_due_date = getNext30thDate();
+        }
+        $stmtDev = $pdo->prepare("UPDATE developers SET status_langganan = ?, fonnte_token = ?, wa_number = ?, billing_due_date = ? WHERE id = ?");
+        $stmtDev->execute([$new_status, $fonnte_token, $wa_number, $billing_due_date, $developer_id]);
+    } else {
+        $stmtDev = $pdo->prepare("UPDATE developers SET status_langganan = ?, fonnte_token = ?, wa_number = ? WHERE id = ?");
+        $stmtDev->execute([$new_status, $fonnte_token, $wa_number, $developer_id]);
+    }
 
     // 2. Update status di tabel users untuk owner-nya
     $user_status = 'Inactive';

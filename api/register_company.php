@@ -100,23 +100,30 @@ try {
     }
 
     if (!empty($admin_token)) {
-        $msg_wa = "Ada Tenant Baru mendaftar silahkan dichek";
-        $target_wa = defined('SUPER_ADMIN_WA') ? SUPER_ADMIN_WA : '0895808626677';
-        
-        $curl = curl_init();
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://api.fonnte.com/send',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POSTFIELDS => array(
-                'target' => $target_wa,
-                'message' => $msg_wa,
-            ),
-            CURLOPT_HTTPHEADER => array(
-                "Authorization: " . $admin_token
-            ),
-        ));
-        curl_exec($curl);
-        curl_close($curl);
+        $msg_wa = "📢 *PENDAFTARAN TENANT BARU*\n\n"
+                . "Ada Tenant Baru mendaftar: *" . trim($_POST['nama_perusahaan']) . "*\n"
+                . "Pemilik: *" . trim($_POST['nama_user']) . "*\n"
+                . "Kontak: " . trim($_POST['kontak_perusahaan']) . "\n\n"
+                . "Silakan periksa dan lakukan validasi di panel admin.";
+                
+        $admin_numbers = ['62895808626677', '6281110240001'];
+        foreach ($admin_numbers as $target_wa) {
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://api.fonnte.com/send',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => array(
+                    'target' => $target_wa,
+                    'message' => $msg_wa,
+                ),
+                CURLOPT_HTTPHEADER => array(
+                    "Authorization: " . $admin_token
+                ),
+            ));
+            curl_exec($curl);
+            curl_close($curl);
+        }
     }
 
     echo json_encode(["message" => "Registrasi perusahaan berhasil! Akun Anda akan segera divalidasi oleh Super Admin dalam 1x24 jam."]);

@@ -50,14 +50,14 @@ try {
                 sendWA($wa_number, $msg);
             }
         }
-        // SKENARIO B: H-3 JATUH TEMPO (days_diff == 3)
-        elseif ($days_diff === 3) {
-            echo "-> PENGINGAT H-3: Mengirim pesan WhatsApp peringatan.\n";
+        // SKENARIO B: H-5 JATUH TEMPO (days_diff == 5)
+        elseif ($days_diff === 5) {
+            echo "-> PENGINGAT H-5: Mengirim pesan WhatsApp peringatan.\n";
 
             if (!empty($wa_number)) {
                 $msg = "⚠️ *PENGINGAT JATUH TEMPO LANGGANAN*\n\n"
                      . "Halo, tim *{$nama}*.\n"
-                     . "Masa aktif langganan aplikasi CRM Pro Syariah Anda akan berakhir dalam *3 hari lagi* pada tanggal *{$formatted_due}*.\n\n"
+                     . "Masa aktif langganan aplikasi CRM Pro Syariah Anda akan berakhir dalam *5 hari lagi* pada tanggal *{$formatted_due}*.\n\n"
                      . "Agar operasional agen Anda tidak terganggu, mohon persiapkan pembayaran langganan bulanan sebesar *Rp " . number_format($t['billing_amount'], 0, ',', '.') . "*.\n\n"
                      . "Pembayaran dapat dikirim ke:\n"
                      . "🏦 *Bank Mandiri / BSI / Permata*\n"

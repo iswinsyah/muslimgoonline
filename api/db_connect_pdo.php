@@ -20,7 +20,7 @@ try {
 } catch (\PDOException $e) {
     // Di production, jangan echo error detail ke publik
     http_response_code(500);
-    echo json_encode(["error" => "Koneksi Database Gagal"]);
+    echo json_encode(["error" => "Koneksi Database Gagal: " . $e->getMessage()]);
     exit;
 }
 ?>
