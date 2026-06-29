@@ -418,72 +418,133 @@ Format output WAJIB berupa JSON murni dengan key sebagai berikut (tanpa pembungk
     }
 }
 
-// 2. CREATIVE SUITE
+// 2. CREATIVE SUITE (AI SOCIAL MEDIA KIT)
 export class CreativeSuiteComponent {
     constructor(containerId, state) {
         this.container = document.getElementById(containerId);
         this.state = state;
-        this.activeMode = 'caption';
-        this.lastAIResults = {}; // { caption: "...", visual: "...", video: "..." }
-        this.modes = {
-            caption: {
-                label: 'Caption & Hashtag',
-                icon: 'file-text',
-                db_key: 'ai_creative_caption',
-                prompt_instruction: "Buatlah **Copywriting Lengkap** untuk caption Instagram/Facebook yang sangat persuasif, terdiri dari: \n1. **Headline** yang menarik perhatian. \n2. **Body Copy** yang menjelaskan keuntungan sesuai persona. \n3. **Call to Action (CTA)** yang kuat. \n4. Sertakan juga **10-15 rekomendasi hashtag** yang relevan dengan topik dan target market."
-            },
-            visual: {
-                label: 'Visual Idea',
-                icon: 'image',
-                db_key: 'ai_creative_visual',
-                prompt_instruction: "Berikan **Ide Konsep Visual** untuk postingan Instagram (bisa carousel atau single image). Jelaskan secara detail: \n1. **Gambar Utama/Slide 1:** Deskripsi visual dan teks overlay. \n2. **Gambar/Slide Berikutnya:** Deskripsi visual dan poin-poin penting. \n3. **Teks untuk Caption:** Tulis caption singkat yang sesuai dengan visualnya."
-            },
-            video: {
-                label: 'Video Script',
-                icon: 'video',
-                db_key: 'ai_creative_video',
-                prompt_instruction: "Tulis **Naskah/Script Video Pendek** (TikTok/Reels) yang lengkap, mencakup: \n1. **Hook (3 detik pertama):** Kalimat atau adegan pembuka yang membuat orang berhenti scroll. \n2. **Isi Video:** Poin-poin utama yang disampaikan (bisa berupa narasi atau teks di layar). \n3. **Visual/Adegan:** Deskripsi singkat adegan yang harus direkam. \n4. **Call to Action (CTA):** Ajakan di akhir video."
-            }
-        };
+        this.activeTab = 'carousel'; // 'carousel', 'video', 'copywriting'
+        this.currentSlide = 1;
+        this.currentTheme = 'teal'; // 'teal', 'gold', 'dark'
+        this.selectedImage = 'default';
+        this.kitResult = null;
     }
 
     render() {
         if (!this.container) return;
 
-        const tabButtons = Object.keys(this.modes).map(key => {
-            const mode = this.modes[key];
-            return `<button data-mode="${key}" class="creative-tab-btn shrink-0 snap-center min-w-[140px] flex-1 py-3 px-4 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all flex items-center justify-center">
-                        <i data-lucide="${mode.icon}" class="w-3.5 h-3.5 mr-2"></i> ${mode.label}
-                    </button>`;
-        }).join('');
+        // Cek apakah ada hasil harian dari cron job untuk hari ini
+        const todaysContentStr = this.state.developerSettings?.ai_todays_content;
+        let todaysContent = null;
+        const todayDateStr = new Date().toISOString().split('T')[0];
+
+        if (todaysContentStr) {
+            try {
+                const parsed = typeof todaysContentStr === 'string' ? JSON.parse(todaysContentStr) : todaysContentStr;
+                if (parsed.date === todayDateStr) {
+                    todaysContent = parsed;
+                    if (!this.kitResult) {
+                        this.kitResult = parsed.kit;
+                    }
+                }
+            } catch (e) {
+                console.error("Gagal memuat konten harian:", e);
+            }
+        }
 
         this.container.innerHTML = `
-            <div class="max-w-5xl mx-auto space-y-6">
-                <div id="creative-tabs-container" class="flex space-x-2 md:space-x-4 bg-white p-2 rounded-2xl shadow-sm border border-slate-200 overflow-x-auto hide-scroll shrink-0 snap-x">
-                    ${tabButtons}
-                </div>
-                <div id="creative-content-area">
-                    <!-- Konten tab akan dirender di sini -->
+            <div class="max-w-6xl mx-auto space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
+                    
+                    <!-- Form input parameter (Kiri - 4 Kolom) -->
+                    <div class="lg:col-span-4 bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm space-y-5">
+                         <div class="flex items-center gap-3 border-b pb-4">
+                             <div class="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center text-teal-600 shrink-0">
+                                 <i data-lucide="sparkles" class="w-5 h-5"></i>
+                             </div>
+                             <div>
+                                 <h3 class="text-xs md:text-sm font-black text-slate-800 uppercase tracking-widest italic">AI Social Media Kit</h3>
+                                 <p class="text-[9px] text-slate-500 font-medium">Buat aset carousel & naskah video instan dalam sekali klik.</p>
+                             </div>
+                         </div>
+                         
+                         <!-- Indikator Konten Harian -->
+                         ${todaysContent ? `
+                         <div class="bg-teal-50 border border-teal-200 rounded-2xl p-4 text-left">
+                              <p class="text-[9px] font-black text-teal-800 uppercase tracking-wider flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>Konten Hari Ini Siap!</p>
+                              <p class="text-[11px] font-bold text-slate-800 mt-1">Hari ${todaysContent.day_index}: ${todaysContent.topic}</p>
+                              <p class="text-[9px] text-slate-400 mt-0.5">Format rekomendasi: ${todaysContent.format}</p>
+                         </div>
+                         ` : ''}
+
+                         <div class="space-y-4">
+                             <div>
+                                  <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Topik Utama Konten</label>
+                                  <textarea id="topic-input" placeholder="Ketik topik promosi iklan properti..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-teal-500 h-24 resize-none shadow-inner">${todaysContent ? todaysContent.topic : ''}</textarea>
+                             </div>
+
+                             <div>
+                                  <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Angle Copywriting</label>
+                                  <select id="creative-angle" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl text-[10px] font-bold outline-none focus:ring-2 focus:ring-teal-500">
+                                       <option value="Syariah Murni Tanpa Sita">Angle: Syariah Murni Tanpa Sita</option>
+                                       <option value="Rumah Pertama Milenial">Angle: Rumah Pertama Milenial</option>
+                                       <option value="Investasi Properti Menguntungkan">Angle: Investasi Properti Menguntungkan</option>
+                                  </select>
+                             </div>
+
+                             <div>
+                                  <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Detail Tambahan (Opsional)</label>
+                                  <textarea id="additional-input" placeholder="Masukkan harga mulai, diskon DP, cash back, dll..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-teal-500 h-24 resize-none shadow-inner"></textarea>
+                             </div>
+
+                             <button id="btn-generate-kit" class="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl font-black text-[10px] uppercase shadow-xl transition-all active:scale-95 flex items-center justify-center gap-1.5">
+                                  <i data-lucide="wand-2" class="w-4 h-4"></i> Generate Social Media Kit
+                             </button>
+                         </div>
+                    </div>
+
+                    <!-- Panel Output Hasil (Kanan - 8 Kolom) -->
+                    <div class="lg:col-span-8 space-y-6">
+                         <!-- Header Tab Menu -->
+                         <div class="flex space-x-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-200 overflow-x-auto hide-scroll shrink-0">
+                              <button data-tab="carousel" class="kit-tab-btn flex-1 py-3 px-4 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 shrink-0 min-w-[130px]">
+                                   <i data-lucide="instagram" class="w-4 h-4"></i> Carousel Studio
+                              </button>
+                              <button data-tab="video" class="kit-tab-btn flex-1 py-3 px-4 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 shrink-0 min-w-[130px]">
+                                   <i data-lucide="video" class="w-4 h-4"></i> Video & VO Script
+                              </button>
+                              <button data-tab="copywriting" class="kit-tab-btn flex-1 py-3 px-4 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 shrink-0 min-w-[130px]">
+                                   <i data-lucide="file-text" class="w-4 h-4"></i> Copywriting
+                              </button>
+                         </div>
+
+                         <!-- Konten dari Tab Terpilih -->
+                         <div id="kit-tab-content-area" class="min-h-[400px]">
+                              <!-- Diisi dinamis -->
+                         </div>
+                    </div>
+
                 </div>
             </div>
         `;
 
-        this.container.querySelector('#creative-tabs-container').addEventListener('click', (e) => {
-            const button = e.target.closest('.creative-tab-btn');
-            if (button && button.dataset.mode) {
-                this.switchMode(button.dataset.mode);
-            }
+        this.container.querySelector('#btn-generate-kit').addEventListener('click', () => this.generateKit());
+        
+        this.container.querySelectorAll('.kit-tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.switchTab(e.currentTarget.dataset.tab);
+            });
         });
 
-        this.switchMode(this.activeMode); // Render tab awal
+        this.switchTab(this.activeTab);
+        if (window.lucide) window.lucide.createIcons();
     }
 
-    switchMode(modeKey) {
-        this.activeMode = modeKey;
+    switchTab(tabKey) {
+        this.activeTab = tabKey;
 
-        // Update style tombol tab
-        this.container.querySelectorAll('.creative-tab-btn').forEach(btn => {
-            if (btn.dataset.mode === modeKey) {
+        this.container.querySelectorAll('.kit-tab-btn').forEach(btn => {
+            if (btn.dataset.tab === tabKey) {
                 btn.classList.add('bg-teal-600', 'text-white', 'shadow-lg');
                 btn.classList.remove('text-slate-400', 'hover:bg-slate-50');
             } else {
@@ -496,94 +557,415 @@ export class CreativeSuiteComponent {
     }
 
     renderTabContent() {
-        const contentArea = this.container.querySelector('#creative-content-area');
-        const config = this.modes[this.activeMode];
-        const savedData = this.state.developerSettings?.[config.db_key];
+        const area = this.container.querySelector('#kit-tab-content-area');
+        if (!area) return;
 
-        contentArea.innerHTML = `
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 animate-in">
-                <div class="bg-white p-6 md:p-10 rounded-[2rem] border border-slate-200 shadow-sm">
-                    <h3 class="text-xs md:text-sm font-black text-slate-800 mb-6 uppercase tracking-widest italic text-center md:text-left">AI Content Parameter</h3>
-                    <div class="space-y-4">
-                        <textarea id="topic-from-calendar" placeholder="Paste topik dari Kalender Konten di sini..." class="w-full bg-teal-50 border-2 border-dashed border-teal-200 rounded-2xl p-4 h-24 text-xs font-medium resize-none focus:ring-2 focus:ring-teal-500 outline-none shadow-inner"></textarea>
-                        <select id="creative-angle" class="w-full bg-slate-50 border p-4 rounded-2xl text-[10px] font-bold outline-none"><option>Angle: Syariah Murni Tanpa Sita</option><option>Angle: Rumah Pertama Milenial</option><option>Angle: Investasi Properti Menguntungkan</option></select>
-                        <textarea id="creative-input" placeholder="Detail TAMBAHAN: Poin promo, spesifikasi unit, dll..." class="w-full bg-slate-50 border rounded-2xl p-4 h-32 md:h-40 text-xs font-medium resize-none focus:ring-2 focus:ring-teal-500 outline-none shadow-inner"></textarea>
-                        <button id="btn-generate-creative" class="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl font-black text-[10px] uppercase shadow-xl transition-all active:scale-95">Generate ${config.label}</button>
-                    </div>
+        if (!this.kitResult) {
+            area.innerHTML = `
+                <div class="bg-white p-10 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center opacity-40 min-h-[400px]">
+                    <i data-lucide="bot" class="w-12 h-12 text-teal-600 mb-4 animate-bounce"></i>
+                    <h4 class="font-bold text-slate-700">AI Social Media Kit Siap Dibuat</h4>
+                    <p class="text-xs text-slate-500 max-w-xs mt-1">Masukkan topik promosi di sisi kiri dan klik "Generate" untuk menyusun materi promo lengkap.</p>
                 </div>
-                <div class="bg-slate-900 p-6 md:p-8 rounded-[2rem] text-white shadow-2xl flex flex-col min-h-[300px] md:min-h-[400px]">
-                    <p class="text-[9px] font-black text-teal-400 uppercase mb-4 tracking-widest flex items-center"><i data-lucide="sparkles" class="w-3.5 h-3.5 mr-2"></i> AI Result: ${config.label}</p>
-                    <div id="creative-result" class="flex-1 flex flex-col items-center justify-center text-center px-4">
-                        <!-- Hasil AI atau data tersimpan -->
-                    </div>
-                    <button id="btn-save-creative" class="hidden mt-6 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-black text-[9px] uppercase shadow-lg transition-all active:scale-95 self-start">
-                        <i data-lucide="save" class="w-3 h-3 inline mr-1.5"></i> Simpan Hasil Ini
-                    </button>
-                </div>
-            </div>
-        `;
-
-        const resultContainer = contentArea.querySelector('#creative-result');
-        if (savedData) {
-            resultContainer.innerHTML = `<div class="w-full h-full bg-white/5 p-4 md:p-6 rounded-2xl text-xs text-slate-200 leading-relaxed font-mono whitespace-pre-wrap border border-white/5 text-left custom-scrollbar overflow-y-auto">${savedData}</div>`;
-        } else {
-            resultContainer.innerHTML = `<div class="opacity-30"><i data-lucide="bot" class="w-8 h-8 mb-3 mx-auto"></i><p class="text-xs italic font-medium">Masukkan parameter dan klik generate.</p></div>`;
+            `;
+            if (window.lucide) window.lucide.createIcons();
+            return;
         }
 
-        // Attach listeners for the new elements
-        contentArea.querySelector('#btn-generate-creative').addEventListener('click', () => this.generate());
-        contentArea.querySelector('#btn-save-creative').addEventListener('click', () => this.saveResult());
+        if (this.activeTab === 'carousel') {
+            const slide = this.kitResult.carousel_slides[this.currentSlide - 1];
+            
+            // Ambil daftar foto album properti dari settings
+            const album = this.state.developerSettings?.property_album;
+            let albumList = [];
+            if (album) {
+                try {
+                    albumList = typeof album === 'string' ? JSON.parse(album) : album;
+                } catch (e) {
+                    albumList = [];
+                }
+            }
+            if (!Array.isArray(albumList)) albumList = [];
+
+            // Tentukan background image mockup
+            let bgUrl = 'assets/img/default-house.jpg'; // default fallback
+            if (this.selectedImage !== 'default') {
+                bgUrl = this.selectedImage;
+            } else if (albumList.length > 0) {
+                bgUrl = albumList[(this.currentSlide - 1) % albumList.length];
+            }
+
+            const bgOptions = albumList.map((url, i) => `
+                <option value="${url}" ${bgUrl === url ? 'selected' : ''}>Foto Album #${i + 1}</option>
+            `).join('');
+
+            // Terapkan class gaya tema
+            let themeOverlayClass = "bg-gradient-to-t from-black/85 via-black/45 to-black/20";
+            let textStyleClass = "text-white font-sans font-black text-center";
+            let borderStyleClass = "";
+
+            if (this.currentTheme === 'teal') {
+                borderStyleClass = "border-[10px] border-teal-700/80";
+                textStyleClass = "text-white font-sans font-extrabold text-center tracking-tight leading-snug";
+            } else if (this.currentTheme === 'gold') {
+                borderStyleClass = "border-[10px] border-amber-600/80";
+                textStyleClass = "text-yellow-100 font-serif italic font-bold text-center leading-relaxed";
+            } else if (this.currentTheme === 'dark') {
+                borderStyleClass = "border-[10px] border-slate-900";
+                textStyleClass = "text-white font-sans font-black text-center uppercase tracking-widest";
+            }
+
+            area.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm animate-in">
+                    <!-- Sisi Kiri: Mockup Frame Instagram -->
+                    <div class="space-y-4 flex flex-col items-center">
+                         <div class="w-full text-center">
+                              <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Live Instagram Carousel Mockup</p>
+                         </div>
+                         
+                         <!-- Mockup Container -->
+                         <div id="carousel-mockup" class="relative aspect-square w-full max-w-[320px] rounded-3xl overflow-hidden shadow-2xl ${borderStyleClass} bg-slate-950 flex flex-col justify-between p-6 select-none transition-all">
+                              <div class="absolute inset-0 z-0">
+                                   <img src="${bgUrl}" class="w-full h-full object-cover" />
+                                   <div class="absolute inset-0 ${themeOverlayClass}"></div>
+                              </div>
+                              
+                              <!-- Header brand -->
+                              <div class="relative z-10 flex items-center justify-between text-white">
+                                   <div class="flex items-center gap-2">
+                                        <img src="${this.state.developerSettings?.logo_url || ''}" class="w-6 h-6 rounded-full bg-white object-contain ${this.state.developerSettings?.logo_url ? '' : 'hidden'}" />
+                                        <span class="text-[9px] font-bold tracking-wider drop-shadow-md uppercase">${this.state.developerSettings?.app_name || 'PROPERTY SYARIAH'}</span>
+                                   </div>
+                                   <span class="text-[8px] bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-sm">Slide ${this.currentSlide} / 6</span>
+                              </div>
+
+                              <!-- Body Teks Slide -->
+                              <div class="relative z-10 my-auto py-4">
+                                   <h3 class="text-sm md:text-base ${textStyleClass} drop-shadow-lg" id="mock-slide-text">
+                                        "${slide ? slide.text_overlay : 'Memuat teks...'}"
+                                   </h3>
+                              </div>
+
+                              <!-- Footer branding -->
+                              <div class="relative z-10 text-center text-[8px] text-white/80 font-bold tracking-widest drop-shadow-md border-t border-white/10 pt-2 uppercase">
+                                   Tanpa Riba • Tanpa Sita • Tanpa Denda
+                              </div>
+                         </div>
+
+                         <!-- Navigasi Slide -->
+                         <div class="flex items-center gap-3">
+                              <button id="btn-prev-slide" class="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition-all active:scale-90" ${this.currentSlide === 1 ? 'disabled opacity-40' : ''}>
+                                   <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                              </button>
+                              <span class="text-xs font-bold text-slate-600 select-none">Slide ${this.currentSlide} of 6</span>
+                              <button id="btn-next-slide" class="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition-all active:scale-90" ${this.currentSlide === 6 ? 'disabled opacity-40' : ''}>
+                                   <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                              </button>
+                         </div>
+                    </div>
+
+                    <!-- Sisi Kanan: Kontrol & Kustomisasi -->
+                    <div class="space-y-4 flex flex-col justify-between">
+                         <div class="space-y-4">
+                              <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider border-b pb-2 italic">Desain Slide</h4>
+                              
+                              <div>
+                                   <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Latar Belakang Gambar</label>
+                                   <select id="select-slide-bg" class="w-full bg-slate-50 border p-3.5 rounded-xl text-[10px] font-bold outline-none">
+                                        <option value="default">Gunakan Foto Unit Otomatis</option>
+                                        ${bgOptions}
+                                   </select>
+                                   <p class="text-[8px] text-slate-400 mt-1">Ubah foto unit properti untuk slide ini (bisa diupload di menu Settings).</p>
+                              </div>
+
+                              <div>
+                                   <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Tema Desain Poster</label>
+                                   <div class="grid grid-cols-3 gap-2">
+                                        <button data-theme="teal" class="theme-btn py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider border ${this.currentTheme === 'teal' ? 'bg-teal-600 text-white border-teal-600' : 'bg-slate-50 border-slate-200 text-slate-500'}">Modern Teal</button>
+                                        <button data-theme="gold" class="theme-btn py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider border ${this.currentTheme === 'gold' ? 'bg-amber-600 text-white border-amber-600' : 'bg-slate-50 border-slate-200 text-slate-500'}">Premium Gold</button>
+                                        <button data-theme="dark" class="theme-btn py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider border ${this.currentTheme === 'dark' ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 border-slate-200 text-slate-500'}">Elegant Dark</button>
+                                   </div>
+                              </div>
+
+                              <div>
+                                   <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Sesuaikan Tulisan Slide</label>
+                                   <textarea id="edit-slide-text" class="w-full p-3 bg-slate-50 border rounded-xl text-xs font-semibold h-16 outline-none focus:ring-1 focus:ring-teal-500 resize-none">${slide ? slide.text_overlay : ''}</textarea>
+                              </div>
+                         </div>
+
+                         <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-2.5">
+                              <button id="btn-download-slide" class="flex-1 py-3.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center justify-center gap-1.5">
+                                   <i data-lucide="download" class="w-4 h-4"></i> Unduh Slide Ini (PNG)
+                              </button>
+                              <a href="https://instagram.com" target="_blank" class="py-3.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all text-center flex items-center justify-center gap-1.5">
+                                   <i data-lucide="external-link" class="w-4 h-4"></i> Buka IG
+                              </a>
+                         </div>
+                    </div>
+                </div>
+            `;
+
+            // Attach controls listeners
+            this.container.querySelector('#btn-prev-slide').onclick = () => {
+                if (this.currentSlide > 1) {
+                    this.currentSlide--;
+                    this.renderTabContent();
+                }
+            };
+            this.container.querySelector('#btn-next-slide').onclick = () => {
+                if (this.currentSlide < 6) {
+                    this.currentSlide++;
+                    this.renderTabContent();
+                }
+            };
+            this.container.querySelector('#select-slide-bg').onchange = (e) => {
+                this.selectedImage = e.target.value;
+                this.renderTabContent();
+            };
+            this.container.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    this.currentTheme = e.currentTarget.dataset.theme;
+                    this.renderTabContent();
+                };
+            });
+            this.container.querySelector('#edit-slide-text').oninput = (e) => {
+                slide.text_overlay = e.target.value;
+                this.container.querySelector('#mock-slide-text').innerText = `"${e.target.value}"`;
+            };
+            this.container.querySelector('#btn-download-slide').onclick = () => this.downloadCurrentSlide();
+
+        } else if (this.activeTab === 'video') {
+            area.innerHTML = `
+                <div class="bg-slate-900 text-white p-6 md:p-8 rounded-[2rem] shadow-2xl space-y-6 animate-in text-left">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                         <p class="text-[9px] font-black text-teal-400 uppercase tracking-widest flex items-center"><i data-lucide="video" class="w-4 h-4 mr-1.5"></i> Video & Voice-Over Studio</p>
+                    </div>
+
+                    <div>
+                         <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Judul Hook Viral (3 Detik Pertama)</p>
+                         <p class="text-xs md:text-sm font-black text-orange-400 select-all border border-slate-800 bg-slate-950 p-3 rounded-xl">${this.kitResult.hook_title || 'Tidak ada hook.'}</p>
+                    </div>
+
+                    <div>
+                         <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Naskah Suara (Voice-Over Script)</p>
+                         <div class="text-xs leading-relaxed font-mono bg-slate-950 p-4 rounded-xl border border-slate-800 max-h-36 overflow-y-auto select-all whitespace-pre-wrap">${this.kitResult.voice_over_script || 'Tidak ada naskah.'}</div>
+                    </div>
+
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                         <div class="flex items-center justify-between">
+                              <p class="text-[8px] font-black text-purple-400 uppercase tracking-widest">Prompt Video AI (Veo/Runway)</p>
+                              <button id="btn-copy-video-prompt" class="px-3 py-1 bg-purple-900/50 hover:bg-purple-900 text-purple-200 border border-purple-800 rounded-lg text-[8px] font-black uppercase tracking-wider transition-all">Salin Prompt</button>
+                         </div>
+                         <p class="text-[10px] italic leading-relaxed text-slate-300 font-serif select-all">"${this.kitResult.video_prompt || 'Tidak ada prompt.'}"</p>
+                         <p class="text-[8px] text-slate-500 mt-1">Salin prompt di atas untuk dimasukkan ke pembuat video AI eksternal seperti Google Veo atau Runway.</p>
+                    </div>
+
+                    <div class="pt-2 flex flex-col sm:flex-row gap-2.5">
+                         <a href="https://tiktok.com" target="_blank" class="flex-1 py-3 bg-white hover:bg-slate-100 text-slate-900 rounded-xl font-black text-[9px] uppercase tracking-widest text-center flex items-center justify-center gap-1.5 shadow-md">
+                              <i data-lucide="external-link" class="w-4 h-4"></i> Buka TikTok
+                         </a>
+                         <a href="https://youtube.com" target="_blank" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-black text-[9px] uppercase tracking-widest text-center flex items-center justify-center gap-1.5 shadow-md">
+                              <i data-lucide="external-link" class="w-4 h-4"></i> Buka Shorts
+                         </a>
+                    </div>
+                </div>
+            `;
+
+            this.container.querySelector('#btn-copy-video-prompt').onclick = (e) => {
+                navigator.clipboard.writeText(this.kitResult.video_prompt);
+                e.currentTarget.innerText = "Tersalin!";
+                setTimeout(() => {
+                    if (this.container.querySelector('#btn-copy-video-prompt')) {
+                        this.container.querySelector('#btn-copy-video-prompt').innerText = "Salin Prompt";
+                    }
+                }, 2000);
+            };
+
+        } else if (this.activeTab === 'copywriting') {
+            area.innerHTML = `
+                <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm space-y-5 text-left animate-in">
+                    <div class="flex items-center justify-between border-b pb-3">
+                         <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider italic flex items-center"><i data-lucide="file-text" class="w-4 h-4 mr-1.5 text-teal-600"></i> Copywriting & Hashtags</h4>
+                         <button id="btn-copy-caption" class="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-[9px] font-black uppercase tracking-wider transition-all shadow-md">Salin Caption</button>
+                    </div>
+
+                    <div>
+                         <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Caption Posting</label>
+                         <div class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium h-48 overflow-y-auto select-all whitespace-pre-wrap">${this.kitResult.caption || 'Tidak ada caption.'}</div>
+                    </div>
+
+                    <div>
+                         <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Tagar Hashtag Berdasarkan Algoritma</label>
+                         <div class="grid grid-cols-2 gap-3">
+                              <div class="bg-slate-50 border p-3 rounded-xl">
+                                   <div class="flex justify-between items-center mb-1"><span class="text-[8px] font-black text-slate-600 uppercase">Instagram</span><button data-platform="instagram" class="btn-copy-tag text-[8px] text-teal-600 font-bold">Salin</button></div>
+                                   <p class="text-[9px] text-slate-500 font-mono truncate select-all">${this.kitResult.hashtags?.instagram || ''}</p>
+                              </div>
+                              <div class="bg-slate-50 border p-3 rounded-xl">
+                                   <div class="flex justify-between items-center mb-1"><span class="text-[8px] font-black text-slate-600 uppercase">Facebook</span><button data-platform="facebook" class="btn-copy-tag text-[8px] text-teal-600 font-bold">Salin</button></div>
+                                   <p class="text-[9px] text-slate-500 font-mono truncate select-all">${this.kitResult.hashtags?.facebook || ''}</p>
+                              </div>
+                              <div class="bg-slate-50 border p-3 rounded-xl">
+                                   <div class="flex justify-between items-center mb-1"><span class="text-[8px] font-black text-slate-600 uppercase">TikTok</span><button data-platform="tiktok" class="btn-copy-tag text-[8px] text-teal-600 font-bold">Salin</button></div>
+                                   <p class="text-[9px] text-slate-500 font-mono truncate select-all">${this.kitResult.hashtags?.tiktok || ''}</p>
+                              </div>
+                              <div class="bg-slate-50 border p-3 rounded-xl">
+                                   <div class="flex justify-between items-center mb-1"><span class="text-[8px] font-black text-slate-600 uppercase">YouTube Shorts</span><button data-platform="shorts" class="btn-copy-tag text-[8px] text-teal-600 font-bold">Salin</button></div>
+                                   <p class="text-[9px] text-slate-500 font-mono truncate select-all">${this.kitResult.hashtags?.shorts || ''}</p>
+                              </div>
+                         </div>
+                    </div>
+                </div>
+            `;
+
+            this.container.querySelector('#btn-copy-caption').onclick = (e) => {
+                navigator.clipboard.writeText(this.kitResult.caption);
+                e.currentTarget.innerText = "Tersalin!";
+                setTimeout(() => {
+                    if (this.container.querySelector('#btn-copy-caption')) {
+                        this.container.querySelector('#btn-copy-caption').innerText = "Salin Caption";
+                    }
+                }, 2000);
+            };
+
+            this.container.querySelectorAll('.btn-copy-tag').forEach(btn => {
+                btn.onclick = (e) => {
+                    const platform = e.currentTarget.dataset.platform;
+                    const tags = this.kitResult.hashtags?.[platform] || '';
+                    navigator.clipboard.writeText(tags);
+                    e.currentTarget.innerText = "Tersalin!";
+                    setTimeout(() => {
+                        e.target.innerText = "Salin";
+                    }, 2000);
+                };
+            });
+        }
 
         if (window.lucide) window.lucide.createIcons();
     }
 
-    async generate() {
-        const contentArea = this.container.querySelector('#creative-content-area');
-        const btn = contentArea.querySelector('#btn-generate-creative');
-        const resContainer = contentArea.querySelector('#creative-result');
-        const saveBtn = contentArea.querySelector('#btn-save-creative');
-
-        const topic = contentArea.querySelector('#topic-from-calendar').value;
-        const angle = contentArea.querySelector('#creative-angle').value;
-        const input = contentArea.querySelector('#creative-input').value;
+    async generateKit() {
+        const topic = this.container.querySelector('#topic-input').value;
+        const angle = this.container.querySelector('#creative-angle').value;
+        const input = this.container.querySelector('#additional-input').value;
+        const btn = this.container.querySelector('#btn-generate-kit');
+        const contentArea = this.container.querySelector('#kit-tab-content-area');
 
         if (!topic) {
-            alert('Silakan paste topik dari Kalender Konten terlebih dahulu.');
+            alert('Silakan masukkan topik utama konten terlebih dahulu.');
             return;
         }
 
         const originalText = btn.innerHTML;
         btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Processing...`;
         btn.disabled = true;
-        saveBtn.classList.add('hidden');
-        resContainer.innerHTML = `<div class="animate-pulse flex flex-col items-center"><i data-lucide="cpu" class="w-8 h-8 text-teal-400 mb-3"></i><p class="text-[10px] font-black uppercase tracking-widest">Merangkai...</p></div>`;
+
+        contentArea.innerHTML = `
+            <div class="bg-white p-10 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center min-h-[400px]">
+                <i data-lucide="cpu" class="w-12 h-12 text-teal-600 mb-4 animate-spin"></i>
+                <h4 class="font-bold text-slate-700">AI Agent sedang meramu konten kit...</h4>
+                <p class="text-xs text-slate-500 max-w-xs mt-1 animate-pulse">Menghasilkan hook viral, naskah video, caption, dan 6 slide poster visual...</p>
+            </div>
+        `;
         if (window.lucide) window.lucide.createIcons();
 
         try {
-            const personaInsight = this.state.developerSettings?.ai_persona_insight || 'Tidak ada data persona. Asumsikan target market umum untuk properti syariah.';
-            const config = this.modes[this.activeMode];
+            const persona = this.state.developerSettings?.ai_persona_insight || 'Target market umum properti syariah';
 
-            const prompt = `Anda adalah seorang Creative Director ahli untuk agensi properti syariah.
+            const prompt = `Anda adalah seorang Creative Copywriter dan Social Media Planner ahli untuk perumahan syariah.
+        
 **KONTEKS BUYER PERSONA:**
 ---
-${personaInsight}
+${persona}
 ---
+
 **TUGAS ANDA:**
-Buat konten kreatif untuk properti syariah dengan detail sebagai berikut:
-- **Topik Utama:** "${topic}"
-- **Angle/Sudut Pandang:** ${angle}
-- **Detail Tambahan dari User:** ${input || 'Tidak ada.'}
-**INSTRUKSI OUTPUT SPESIFIK:**
-${config.prompt_instruction}`;
+Susunlah sebuah **AI Social Media Kit** terpadu untuk topik konten:
+- **Topik:** "${topic}"
+- **Angle/Sudut Pandang:** "${angle}"
+- **Detail Tambahan:** "${input || 'Tidak ada.'}"
+
+**INSTRUKSI OUTPUT (WAJIB JSON TUNGGAL YANG BISA DI-PARSE):**
+Kembalikan output hanya berupa data JSON terstruktur sebagai berikut:
+{
+  "hook_title": "Judul Hook Viral yang menarik minat dalam 3 detik pertama",
+  "carousel_slides": [
+    {
+      "slide_number": 1,
+      "visual_concept": "Deskripsi konsep visual gambar untuk slide 1",
+      "text_overlay": "Teks singkat pembuka di slide 1"
+    },
+    {
+      "slide_number": 2,
+      "visual_concept": "Deskripsi konsep visual gambar untuk slide 2",
+      "text_overlay": "Poin masalah atau fakta di slide 2"
+    },
+    {
+      "slide_number": 3,
+      "visual_concept": "Deskripsi konsep visual gambar untuk slide 3",
+      "text_overlay": "Poin agitasi/pendalaman masalah di slide 3"
+    },
+    {
+      "slide_number": 4,
+      "visual_concept": "Deskripsi konsep visual gambar untuk slide 4",
+      "text_overlay": "Solusi syariah yang ditawarkan di slide 4"
+    },
+    {
+      "slide_number": 5,
+      "visual_concept": "Deskripsi konsep visual gambar untuk slide 5",
+      "text_overlay": "Keunggulan detail unit produk di slide 5"
+    },
+    {
+      "slide_number": 6,
+      "visual_concept": "Deskripsi konsep visual gambar untuk slide 6",
+      "text_overlay": "Ajakan bertindak (CTA) & info kontak di slide 6"
+    }
+  ],
+  "video_prompt": "Prompt detail dalam bahasa Inggris untuk generator video AI (seperti Google Veo atau Runway Gen-2) agar merender video pendek unit rumah syariah aesthetic sesuai topik ini",
+  "voice_over_script": "Naskah narasi suara (Voice-Over) santai, persuasif berdurasi 15-30 detik untuk dibacakan oleh pengisi suara video",
+  "caption": "Copywriting teks Caption promosi lengkap dan rapi untuk diunggah di feed sosial media",
+  "hashtags": {
+    "instagram": "#propertisyariah #rumahminimalis #kprsyariah #instagramhashtags",
+    "facebook": "#propertisyariah #rumahsyariah #facebookhashtags",
+    "tiktok": "#propertisyariah #rumahminimalis #tiktokhashtags #fyp",
+    "shorts": "#shorts #propertisyariah #youtubeshorts"
+  }
+}
+
+Pastikan output hanya string JSON murni tanpa pembungkus markdown seperti \`\`\`json.`;
 
             const response = await ApiService.generateAIContent(prompt);
-            this.lastAIResults[this.activeMode] = response.result;
+            const cleanResponse = (response.result || '').replace(/```json|```/g, '').trim();
+            this.kitResult = JSON.parse(cleanResponse);
 
-            resContainer.innerHTML = `<div class="w-full h-full bg-white/5 p-4 md:p-6 rounded-2xl text-xs text-slate-200 leading-relaxed font-mono whitespace-pre-wrap border border-white/5 text-left custom-scrollbar overflow-y-auto">${response.result}</div>`;
-            saveBtn.classList.remove('hidden');
+            // Simpan otomatis ke database setting agar tidak hilang jika reload
+            const formData = new FormData();
+            formData.append('developer_id', this.state.currentUser.developer_id);
+            formData.append('user_id', this.state.currentUser.id);
+            
+            const encodedCaption = btoa(unescape(encodeURIComponent(this.kitResult.caption)));
+            const encodedVisual = btoa(unescape(encodeURIComponent(JSON.stringify(this.kitResult.carousel_slides))));
+            const encodedVideo = btoa(unescape(encodeURIComponent(JSON.stringify({
+                hook_title: this.kitResult.hook_title,
+                video_prompt: this.kitResult.video_prompt,
+                voice_over_script: this.kitResult.voice_over_script,
+                hashtags: this.kitResult.hashtags
+            }))));
+
+            formData.append('ai_creative_caption', encodedCaption);
+            formData.append('ai_creative_visual', encodedVisual);
+            formData.append('ai_creative_video', encodedVideo);
+
+            await fetch('api/save_developer_settings.php', { method: 'POST', body: formData });
+            
+            this.switchTab(this.activeTab);
 
         } catch (error) {
-            resContainer.innerHTML = `<div class="text-red-400 text-xs">Error: ${error.message}</div>`;
+            contentArea.innerHTML = `
+                <div class="bg-red-50 p-6 rounded-2xl border border-red-200 text-red-500 font-bold text-center">
+                    Gagal merancang kit: ${error.message}
+                </div>
+            `;
         } finally {
             btn.innerHTML = originalText;
             btn.disabled = false;
@@ -591,48 +973,154 @@ ${config.prompt_instruction}`;
         }
     }
 
-    async saveResult() {
-        const contentArea = this.container.querySelector('#creative-content-area');
-        const saveBtn = contentArea.querySelector('#btn-save-creative');
-        const originalText = saveBtn.innerHTML;
-        saveBtn.innerHTML = 'Menyimpan...';
-        saveBtn.disabled = true;
+    downloadCurrentSlide() {
+        const slide = this.kitResult.carousel_slides[this.currentSlide - 1];
+        if (!slide) return;
 
-        const config = this.modes[this.activeMode];
-        const resultToSave = this.lastAIResults[this.activeMode];
+        const canvas = document.createElement('canvas');
+        canvas.width = 1080;
+        canvas.height = 1080;
+        const ctx = canvas.getContext('2d');
 
-        if (!resultToSave) {
-            alert('Tidak ada hasil untuk disimpan.');
-            saveBtn.innerHTML = originalText;
-            saveBtn.disabled = false;
-            return;
+        const bgImg = new Image();
+        bgImg.crossOrigin = "Anonymous";
+
+        // Ambil URL gambar background
+        let imgUrl = 'assets/img/default-house.jpg'; 
+        if (this.selectedImage !== 'default') {
+            imgUrl = this.selectedImage;
+        } else {
+            const album = this.state.developerSettings?.property_album;
+            let albumList = [];
+            if (album) {
+                try {
+                    albumList = typeof album === 'string' ? JSON.parse(album) : album;
+                } catch(e) {}
+            }
+            if (Array.isArray(albumList) && albumList.length > 0) {
+                imgUrl = albumList[(this.currentSlide - 1) % albumList.length];
+            }
         }
 
-        const formData = new FormData();
-        formData.append('developer_id', this.state.currentUser.developer_id);
-        formData.append('user_id', this.state.currentUser.id);
-        
-        const encodedResult = btoa(unescape(encodeURIComponent(resultToSave)));
-        formData.append(config.db_key, encodedResult);
-
-        try {
-            const response = await fetch('api/save_developer_settings.php', { method: 'POST', body: formData });
-            if (!response.ok) throw new Error(`Server Error: ${response.status}`);
-            const result = await response.json();
-            
-            alert(result.message || 'Hasil berhasil disimpan!');
-            saveBtn.classList.add('hidden');
-
-            // Update state global
-            if (!this.state.developerSettings) this.state.developerSettings = {};
-            this.state.developerSettings[config.db_key] = resultToSave;
-
-        } catch (error) {
-            alert('Gagal menyimpan: ' + error.message);
-            saveBtn.innerHTML = originalText;
-        } finally {
-            saveBtn.disabled = false;
+        if (imgUrl.startsWith('/')) {
+            imgUrl = window.location.origin + imgUrl;
         }
+
+        bgImg.src = imgUrl;
+        bgImg.onload = () => {
+            // Draw background image crop cover
+            const scale = Math.max(canvas.width / bgImg.width, canvas.height / bgImg.height);
+            const x = (canvas.width / 2) - (bgImg.width / 2) * scale;
+            const y = (canvas.height / 2) - (bgImg.height / 2) * scale;
+            ctx.drawImage(bgImg, x, y, bgImg.width * scale, bgImg.height * scale);
+
+            // Draw dark overlay gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, 'rgba(0,0,0,0.1)');
+            gradient.addColorStop(0.5, 'rgba(0,0,0,0.4)');
+            gradient.addColorStop(1, 'rgba(0,0,0,0.85)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Theme borders
+            if (this.currentTheme === 'teal') {
+                ctx.strokeStyle = '#0f766e';
+                ctx.lineWidth = 20;
+                ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+            } else if (this.currentTheme === 'gold') {
+                ctx.strokeStyle = '#d97706';
+                ctx.lineWidth = 20;
+                ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+            }
+
+            // Draw Logo (if available)
+            const logoUrl = this.state.developerSettings?.logo_url;
+            if (logoUrl) {
+                const logoImg = new Image();
+                logoImg.crossOrigin = "Anonymous";
+                logoImg.src = window.location.origin + logoUrl;
+                logoImg.onload = () => {
+                    ctx.drawImage(logoImg, 60, 60, 100, 100);
+                    drawTextAndDownload();
+                };
+                logoImg.onerror = () => {
+                    drawTextAndDownload();
+                };
+            } else {
+                drawTextAndDownload();
+            }
+
+            const drawTextAndDownload = () => {
+                // Write Brand Name
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'left';
+                ctx.font = 'bold 28px sans-serif';
+                ctx.fillText(this.state.developerSettings?.app_name || 'PROPERTY SYARIAH', logoUrl ? 180 : 60, 120);
+
+                // Write Slide Number Badge
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.beginPath();
+                ctx.arc(canvas.width - 100, 110, 40, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.font = 'bold 24px sans-serif';
+                ctx.fillText(`${this.currentSlide}/6`, canvas.width - 100, 118);
+
+                // Write Slide Text
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                
+                let fontStyle = 'bold 48px sans-serif';
+                if (this.currentTheme === 'gold') {
+                    fontStyle = 'italic bold 50px Georgia, serif';
+                    ctx.fillStyle = '#fef08a';
+                } else if (this.currentTheme === 'teal') {
+                    fontStyle = '900 48px sans-serif';
+                }
+                ctx.font = fontStyle;
+
+                const text = slide.text_overlay;
+                const words = text.split(' ');
+                let line = '';
+                const lines = [];
+                const maxWidth = 850;
+                const lineHeight = 65;
+
+                for (let n = 0; n < words.length; n++) {
+                    let testLine = line + words[n] + ' ';
+                    let metrics = ctx.measureText(testLine);
+                    let testWidth = metrics.width;
+                    if (testWidth > maxWidth && n > 0) {
+                        lines.push(line);
+                        line = words[n] + ' ';
+                    } else {
+                        line = testLine;
+                    }
+                }
+                lines.push(line);
+
+                let startY = (canvas.height / 2) - ((lines.length - 1) * lineHeight / 2);
+                for (let k = 0; k < lines.length; k++) {
+                    ctx.fillText(lines[k].trim(), canvas.width / 2, startY + (k * lineHeight));
+                }
+
+                // Draw Footer Info
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 24px sans-serif';
+                ctx.fillText('Tanpa Riba • Tanpa Sita • Tanpa Denda', canvas.width / 2, canvas.height - 90);
+
+                // Trigger download
+                const link = document.createElement('a');
+                link.download = `Slide_${this.currentSlide}_${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            };
+        };
+        bgImg.onerror = () => {
+            alert('Gagal memuat gambar latar belakang untuk download.');
+        };
     }
 }
 

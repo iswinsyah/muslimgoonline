@@ -161,15 +161,43 @@ export class SettingsComponent {
                         <button type="submit" id="btn-save-settings" class="w-full py-4 bg-[#2845D6] text-white rounded-xl font-black text-sm uppercase tracking-widest shadow-lg hover:bg-blue-700 transition-all active:scale-95">Simpan Pengaturan</button>
                     </div>
                 </form>
+
+                <!-- Panel Galeri Album Properti (Hanya untuk Developer / Tenant) -->
+                ${this.state.currentUser.role !== 'Super Admin' ? `
+                <div id="property-album-panel" class="bg-white p-6 md:p-10 rounded-[2rem] border border-slate-200 shadow-lg space-y-6">
+                     <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                         <div class="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center text-teal-600 shrink-0">
+                             <i data-lucide="images" class="w-5 h-5"></i>
+                         </div>
+                         <div>
+                             <h4 class="text-xs font-black text-slate-800 uppercase tracking-widest italic">Galeri Album Properti</h4>
+                             <p class="text-[10px] text-slate-500 font-medium">Unggah foto-foto unit asli properti Anda untuk digunakan sebagai background poster di Creative Suite.</p>
+                         </div>
+                     </div>
+                     
+                     <!-- Drag and Drop Upload Area -->
+                     <div id="album-drop-zone" class="border-2 border-dashed border-slate-300 hover:border-[#2845D6] bg-slate-50 rounded-2xl p-8 text-center cursor-pointer transition-colors relative group">
+                          <input type="file" id="album-file-input" class="absolute inset-0 opacity-0 cursor-pointer" multiple accept="image/*" />
+                          <i data-lucide="image-plus" class="w-8 h-8 text-slate-400 group-hover:text-[#2845D6] mx-auto mb-2 transition-colors"></i>
+                          <p class="text-xs font-bold text-slate-600">Seret foto-foto unit ke sini atau <span class="text-[#2845D6]">Pilih Berkas</span></p>
+                          <p class="text-[9px] text-slate-400 mt-1">Mendukung format JPG, PNG, WEBP (Maksimal 2MB per gambar).</p>
+                     </div>
+
+                     <!-- Galeri Grid -->
+                     <div id="album-gallery-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
+                          <!-- List gambar akan dimuat di sini -->
+                     </div>
+                </div>
+                ` : ''}
             </div>
         `;
 
         this.attachEventListeners();
-        if (window.lucide) window.lucide.createIcons();
-
         if (this.state.currentUser.role !== 'Super Admin') {
+            this.renderAlbumGrid();
             this.checkWhatsAppStatus();
         }
+        if (window.lucide) window.lucide.createIcons();
     }
 
     attachEventListeners() {
@@ -255,6 +283,52 @@ export class SettingsComponent {
                 btn.disabled = false;
             }
         });
+
+        // Album file input listener
+        const albumFileInput = this.container.querySelector('#album-file-input');
+        if (albumFileInput) {
+            albumFileInput.addEventListener('change', async (e) => {
+                const files = e.target.files;
+                if (!files || files.length === 0) return;
+
+                const dropZone = this.container.querySelector('#album-drop-zone');
+                const originalHTML = dropZone.innerHTML;
+                dropZone.innerHTML = `<i data-lucide="loader-2" class="w-8 h-8 text-[#2845D6] mx-auto mb-2 animate-spin"></i><p class="text-xs font-bold text-slate-700">Mengunggah ${files.length} berkas...</p>`;
+                if (window.lucide) window.lucide.createIcons();
+
+                let successCount = 0;
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const formData = new FormData();
+                    formData.append('developer_id', this.state.currentUser.developer_id);
+                    formData.append('user_id', this.state.currentUser.id);
+                    formData.append('file', file);
+
+                    try {
+                        const response = await fetch('api/upload_album.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const result = await response.json();
+                        if (!response.ok) throw new Error(result.message);
+
+                        this.state.developerSettings.property_album = result.album; // Update local state
+                        successCount++;
+                    } catch (err) {
+                        alert(`Gagal mengunggah ${file.name}: ` + err.message);
+                    }
+                }
+                
+                dropZone.innerHTML = originalHTML;
+                if (window.lucide) window.lucide.createIcons();
+
+                if (successCount > 0) {
+                    alert(`${successCount} foto berhasil diunggah!`);
+                    this.renderAlbumGrid();
+                }
+                albumFileInput.value = ''; // Reset input
+            });
+        }
     }
 
     async checkWhatsAppStatus() {
@@ -500,5 +574,68 @@ export class SettingsComponent {
             clearInterval(window.waPollingInterval);
             window.waPollingInterval = null;
         }
+    }
+
+    renderAlbumGrid() {
+        const grid = this.container.querySelector('#album-gallery-grid');
+        if (!grid) return;
+
+        const album = this.state.developerSettings?.property_album;
+        let albumList = [];
+        if (album) {
+            try {
+                albumList = typeof album === 'string' ? JSON.parse(album) : album;
+            } catch (e) {
+                albumList = [];
+            }
+        }
+        if (!Array.isArray(albumList)) albumList = [];
+
+        if (albumList.length === 0) {
+            grid.innerHTML = `<div class="col-span-full py-8 text-center text-xs text-slate-400 italic">Belum ada foto unit di album ini. Silakan unggah beberapa foto di atas.</div>`;
+            return;
+        }
+
+        grid.innerHTML = albumList.map(url => {
+            return `
+                <div class="relative group aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-sm">
+                    <img src="${url}" class="w-full h-full object-cover animate-in fade-in duration-300" />
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <button type="button" data-url="${url}" class="btn-delete-album-item p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-transform active:scale-90" title="Hapus Foto">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        if (window.lucide) window.lucide.createIcons();
+
+        // Attach delete event listeners
+        grid.querySelectorAll('.btn-delete-album-item').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const url = e.currentTarget.dataset.url;
+                if (confirm('Apakah Anda yakin ingin menghapus foto ini dari album?')) {
+                    try {
+                        const response = await fetch('api/delete_album_item.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                developer_id: this.state.currentUser.developer_id,
+                                user_id: this.state.currentUser.id,
+                                file_url: url
+                            })
+                        });
+                        const result = await response.json();
+                        if (!response.ok) throw new Error(result.message);
+
+                        this.state.developerSettings.property_album = result.album; // Update local state
+                        this.renderAlbumGrid(); // Re-render grid
+                    } catch (err) {
+                        alert('Gagal menghapus: ' + err.message);
+                    }
+                }
+            });
+        });
     }
 }

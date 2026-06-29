@@ -85,7 +85,7 @@ try {
     }
     if ($ai_content_calendar !== null) {
         $decoded_calendar = base64_decode($ai_content_calendar);
-        $stmt = $pdo->prepare("UPDATE developers SET ai_content_calendar = ? WHERE id = ?");
+        $stmt = $pdo->prepare("UPDATE developers SET ai_content_calendar = ?, calendar_started_at = NOW() WHERE id = ?");
         $stmt->execute([$decoded_calendar, $developer_id]);
         $message = 'Kalender konten berhasil disimpan!';
         $is_specific_update = true;
