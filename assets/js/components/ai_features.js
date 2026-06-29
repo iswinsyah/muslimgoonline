@@ -461,7 +461,7 @@ export class CreativeSuiteComponent {
             try {
                 const calendar = typeof calendarStr === 'string' ? JSON.parse(calendarStr) : calendarStr;
                 if (Array.isArray(calendar) && calendar.length > 0) {
-                    const startTs = startedAt ? new Date(startedAt).getTime() : Date.now();
+                    const startTs = (startedAt && typeof startedAt === 'string') ? new Date(startedAt.replace(' ', 'T')).getTime() : Date.now();
                     const diffMs = Date.now() - startTs;
                     let dayIndex = Math.floor(diffMs / 86400000) + 1;
                     if (dayIndex <= 0) dayIndex = 1;
