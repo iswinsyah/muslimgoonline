@@ -81,6 +81,10 @@ if (!loggedInUser) {
                     }
                     return { ...m, roles: r };
                 });
+                if (fetchedMenus.length === 0) {
+                    console.warn("CRM Pro: Menu di database kosong, mengalihkan ke menu default.");
+                    fetchedMenus = getDefaultMenus(state.currentRole);
+                }
             } catch (error) {
                 console.error("CRM Pro: Gagal memuat menu dari server. Mengalihkan ke menu default.", error);
                 fetchedMenus = getDefaultMenus(state.currentRole);
