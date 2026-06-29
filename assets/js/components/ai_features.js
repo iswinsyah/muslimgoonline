@@ -459,7 +459,11 @@ export class CreativeSuiteComponent {
 
         if (calendarStr) {
             try {
-                const calendar = typeof calendarStr === 'string' ? JSON.parse(calendarStr) : calendarStr;
+                let cleanCalendarStr = calendarStr;
+                if (typeof cleanCalendarStr === 'string') {
+                    cleanCalendarStr = cleanCalendarStr.replace(/```json|```/g, '').trim();
+                }
+                const calendar = typeof cleanCalendarStr === 'string' ? JSON.parse(cleanCalendarStr) : cleanCalendarStr;
                 if (Array.isArray(calendar) && calendar.length > 0) {
                     const startTs = (startedAt && typeof startedAt === 'string') ? new Date(startedAt.replace(' ', 'T')).getTime() : Date.now();
                     const diffMs = Date.now() - startTs;
@@ -1861,7 +1865,8 @@ Pastikan jumlah object sesuai dengan (Durasi x Frekuensi). Jangan tambahkan teks
         formData.append('developer_id', this.state.currentUser.developer_id);
         formData.append('user_id', this.state.currentUser.id);
         
-        const encodedCalendar = btoa(unescape(encodeURIComponent(this.lastAIResult)));
+        const cleanCalendarResult = (this.lastAIResult || '').replace(/```json|```/g, '').trim();
+        const encodedCalendar = btoa(unescape(encodeURIComponent(cleanCalendarResult)));
         formData.append('ai_content_calendar', encodedCalendar);
 
         try {
@@ -1871,7 +1876,7 @@ Pastikan jumlah object sesuai dengan (Durasi x Frekuensi). Jangan tambahkan teks
             alert('Kalender konten berhasil disimpan!');
             saveButton.classList.add('hidden');
             if (!this.state.developerSettings) this.state.developerSettings = {};
-            this.state.developerSettings.ai_content_calendar = this.lastAIResult;
+            this.state.developerSettings.ai_content_calendar = cleanCalendarResult;
         } catch (error) {
             alert('Gagal menyimpan kalender: ' + error.message);
             saveButton.innerHTML = originalContent;

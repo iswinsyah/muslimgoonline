@@ -22,6 +22,13 @@ try {
         exit;
     }
     
+    if ($settings && !empty($settings['ai_content_calendar']) && empty($settings['calendar_started_at'])) {
+        $now = date('Y-m-d H:i:s');
+        $stmtUpdate = $pdo->prepare("UPDATE developers SET calendar_started_at = ? WHERE id = ?");
+        $stmtUpdate->execute([$now, $developer_id]);
+        $settings['calendar_started_at'] = $now;
+    }
+
     // Set default app_name if it's null or empty
     if (empty($settings['app_name'])) {
         $settings['app_name'] = $settings['nama_perusahaan'];
