@@ -513,7 +513,7 @@ export class CreativeSuiteComponent {
                               <p class="text-[9px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Topik Hari Ini Terdeteksi</p>
                               <p class="text-[11px] font-bold text-slate-700 mt-1">${calendarTopic}</p>
                          </div>
-                         ` : ''))}
+                         ` : '')}
 
                          <div class="space-y-4">
                              <div>
