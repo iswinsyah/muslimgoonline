@@ -485,6 +485,24 @@ export class CreativeSuiteComponent {
 
         const displayTopic = todaysContent ? todaysContent.topic : calendarTopic;
 
+        let indicatorHTML = '';
+        if (todaysContent) {
+            indicatorHTML = `
+            <div class="bg-teal-50 border border-teal-200 rounded-2xl p-4 text-left">
+                 <p class="text-[9px] font-black text-teal-800 uppercase tracking-wider flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>Konten Hari Ini Siap!</p>
+                 <p class="text-[11px] font-bold text-slate-800 mt-1">Hari ${todaysContent.day_index}: ${todaysContent.topic}</p>
+                 <p class="text-[9px] text-slate-400 mt-0.5">Format rekomendasi: ${todaysContent.format}</p>
+            </div>
+            `;
+        } else if (calendarTopic) {
+            indicatorHTML = `
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left">
+                 <p class="text-[9px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Topik Hari Ini Terdeteksi</p>
+                 <p class="text-[11px] font-bold text-slate-700 mt-1">${calendarTopic}</p>
+            </div>
+            `;
+        }
+
         this.container.innerHTML = `
             <div class="max-w-6xl mx-auto space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
@@ -502,18 +520,7 @@ export class CreativeSuiteComponent {
                          </div>
                          
                          <!-- Indikator Konten Harian -->
-                         ${todaysContent ? `
-                         <div class="bg-teal-50 border border-teal-200 rounded-2xl p-4 text-left">
-                              <p class="text-[9px] font-black text-teal-800 uppercase tracking-wider flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>Konten Hari Ini Siap!</p>
-                              <p class="text-[11px] font-bold text-slate-800 mt-1">Hari ${todaysContent.day_index}: ${todaysContent.topic}</p>
-                              <p class="text-[9px] text-slate-400 mt-0.5">Format rekomendasi: ${todaysContent.format}</p>
-                         </div>
-                         ` : (calendarTopic ? `
-                         <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left">
-                              <p class="text-[9px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Topik Hari Ini Terdeteksi</p>
-                              <p class="text-[11px] font-bold text-slate-700 mt-1">${calendarTopic}</p>
-                         </div>
-                         ` : '')}
+                         ${indicatorHTML}
 
                          <div class="space-y-4">
                              <div>
