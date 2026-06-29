@@ -2,6 +2,8 @@
 // api/cron_generate_daily_content.php
 // Script ini dijalankan otomatis oleh Cron Job Server setiap hari pukul 05:00 WIB
 
+date_default_timezone_set('Asia/Jakarta');
+
 require_once 'db_connect_pdo.php';
 require_once 'config.php';
 

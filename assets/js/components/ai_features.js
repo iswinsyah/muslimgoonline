@@ -452,6 +452,35 @@ export class CreativeSuiteComponent {
             }
         }
 
+        // Hitung topik hari ini langsung dari Kalender Konten jika belum ada data todaysContent
+        let calendarTopic = '';
+        const calendarStr = this.state.developerSettings?.ai_content_calendar;
+        const startedAt = this.state.developerSettings?.calendar_started_at;
+
+        if (calendarStr) {
+            try {
+                const calendar = typeof calendarStr === 'string' ? JSON.parse(calendarStr) : calendarStr;
+                if (Array.isArray(calendar) && calendar.length > 0) {
+                    const startTs = startedAt ? new Date(startedAt).getTime() : Date.now();
+                    const diffMs = Date.now() - startTs;
+                    let dayIndex = Math.floor(diffMs / 86400000) + 1;
+                    if (dayIndex <= 0) dayIndex = 1;
+                    
+                    // Modulus siklus hari kalender
+                    dayIndex = ((dayIndex - 1) % calendar.length) + 1;
+
+                    const todayItem = calendar.find(item => parseInt(item.day) === dayIndex);
+                    if (todayItem) {
+                        calendarTopic = todayItem.topic_idea || '';
+                    }
+                }
+            } catch (err) {
+                console.error("Gagal parse Kalender Konten:", err);
+            }
+        }
+
+        const displayTopic = todaysContent ? todaysContent.topic : calendarTopic;
+
         this.container.innerHTML = `
             <div class="max-w-6xl mx-auto space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
@@ -475,12 +504,17 @@ export class CreativeSuiteComponent {
                               <p class="text-[11px] font-bold text-slate-800 mt-1">Hari ${todaysContent.day_index}: ${todaysContent.topic}</p>
                               <p class="text-[9px] text-slate-400 mt-0.5">Format rekomendasi: ${todaysContent.format}</p>
                          </div>
-                         ` : ''}
+                         ` : (calendarTopic ? `
+                         <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left">
+                              <p class="text-[9px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Topik Hari Ini Terdeteksi</p>
+                              <p class="text-[11px] font-bold text-slate-700 mt-1">${calendarTopic}</p>
+                         </div>
+                         ` : ''))}
 
                          <div class="space-y-4">
                              <div>
                                   <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Topik Utama Konten</label>
-                                  <textarea id="topic-input" placeholder="Ketik topik promosi iklan properti..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-teal-500 h-24 resize-none shadow-inner">${todaysContent ? todaysContent.topic : ''}</textarea>
+                                  <textarea id="topic-input" placeholder="Ketik topik promosi iklan properti..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-teal-500 h-24 resize-none shadow-inner">${displayTopic}</textarea>
                              </div>
 
                              <div>
