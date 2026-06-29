@@ -22,7 +22,7 @@ try {
     }
 
     $hashed_password = password_hash($data['password'], PASSWORD_DEFAULT);
-    $no_whatsapp = $data['no_whatsapp'] ?? null;
+    $no_whatsapp = isset($data['no_whatsapp']) ? formatWhatsAppNumber($data['no_whatsapp']) : null;
     
     $stmt = $pdo->prepare("INSERT INTO users (developer_id, nama_user, username, password, no_whatsapp, role, status, is_first_login) VALUES (?, ?, ?, ?, ?, ?, 'Active', 0)");
     $stmt->execute([

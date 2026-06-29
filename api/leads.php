@@ -10,7 +10,7 @@ if ($action === 'create') {
     $user_id = $_POST['user_id'] ?? null;
     $name = $_POST['name'] ?? null;
     $nik = $_POST['nik'] ?? null;
-    $phone = $_POST['phone'] ?? null; // Opsional
+    $phone = isset($_POST['phone']) ? formatWhatsAppNumber($_POST['phone']) : null; // Opsional
     $job = $_POST['job'] ?? null;
     $channel = $_POST['channel'] ?? null;
     $segment = $_POST['segment'] ?? null;
@@ -81,7 +81,7 @@ if ($action === 'create') {
     $id = $_POST['id'] ?? null;
     $name = $_POST['name'] ?? null;
     $nik = $_POST['nik'] ?? null;
-    $phone = $_POST['phone'] ?? null;
+    $phone = isset($_POST['phone']) ? formatWhatsAppNumber($_POST['phone']) : null;
     $job = $_POST['job'] ?? null;
     $channel = $_POST['channel'] ?? null;
     $segment = $_POST['segment'] ?? null;

@@ -204,9 +204,9 @@ export class ApiService {
         }
     }
 
-    static async getAllUsers() {
+    static async getAllUsers(adminId) {
         try {
-            const response = await fetch(`${API_BASE_URL}/get_all_users.php`);
+            const response = await fetch(`${API_BASE_URL}/get_all_users.php?admin_id=${encodeURIComponent(adminId)}`);
             return await this.handleResponse(response);
         } catch (error) {
             console.error("API Error (getAllUsers):", error);
@@ -214,12 +214,52 @@ export class ApiService {
         }
     }
 
-    static async getUserForImpersonation(userId) {
+    static async getUserForImpersonation(userId, adminId) {
         try {
-            const response = await fetch(`${API_BASE_URL}/get_user_for_impersonation.php?user_id=${userId}`);
+            const response = await fetch(`${API_BASE_URL}/get_user_for_impersonation.php?user_id=${userId}&admin_id=${encodeURIComponent(adminId)}`);
             return await this.handleResponse(response);
         } catch (error) {
             console.error("API Error (getUserForImpersonation):", error);
+            throw error;
+        }
+    }
+
+    static async saveLearning(learningData, userId) {
+        try {
+            const response = await this.post('save_learning.php', { ...learningData, user_id: userId });
+            return response;
+        } catch (error) {
+            console.error("API Error (saveLearning):", error);
+            throw error;
+        }
+    }
+
+    static async getLearnings(developerId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/get_learnings.php?developer_id=${encodeURIComponent(developerId)}`);
+            return await this.handleResponse(response);
+        } catch (error) {
+            console.error("API Error (getLearnings):", error);
+            throw error;
+        }
+    }
+
+    static async getGlobalLearnings(adminId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/get_global_learnings.php?admin_id=${encodeURIComponent(adminId)}`);
+            return await this.handleResponse(response);
+        } catch (error) {
+            console.error("API Error (getGlobalLearnings):", error);
+            throw error;
+        }
+    }
+
+    static async getDevelopers() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/get_developers.php`);
+            return await this.handleResponse(response);
+        } catch (error) {
+            console.error("API Error (getDevelopers):", error);
             throw error;
         }
     }

@@ -16,6 +16,7 @@ import { SettingsComponent } from './components/settings.js?v=1.0.9';
 import { TeamManagementComponent } from './components/team_management.js';
 import { BuyerListComponent } from './components/buyer_list.js';
 import { TokenPoolComponent } from './components/token_pool.js';
+import { BusinessConsultingComponent } from './components/business_consulting.js';
 
 // --- Cek Sesi Login ---
 const loggedInUser = JSON.parse(localStorage.getItem('mgo_user'));
@@ -51,6 +52,7 @@ if (!loggedInUser) {
     let impersonationComponent = null;
     let buyerListComponent = null;
     let tokenPoolComponent = null;
+    let businessConsultingComponent = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
         await initializeApp();
@@ -413,6 +415,7 @@ if (!loggedInUser) {
     function logout() {
         if (confirm('Apakah Anda yakin ingin keluar?')) {
             localStorage.removeItem('mgo_user');
+            localStorage.removeItem('mgo_super_admin_session');
             window.location.href = 'login.html';
         }
     }
@@ -530,7 +533,7 @@ if (!loggedInUser) {
             reportingComponent.render();
         } else if (tabId === 'ai-lead') {
             mainContent.innerHTML = `<section id="tab-ai-lead" class="h-full overflow-y-auto custom-scrollbar pb-10 animate-in"></section>`;
-            leadAnalyzerComponent = new LeadAnalyzerComponent('tab-ai-lead');
+            leadAnalyzerComponent = new LeadAnalyzerComponent('tab-ai-lead', state);
             leadAnalyzerComponent.render();
         } else if (tabId === 'ai-creative') {
             mainContent.innerHTML = `<section id="tab-ai-creative" class="h-full overflow-y-auto custom-scrollbar pb-10 animate-in"></section>`;
@@ -578,12 +581,15 @@ if (!loggedInUser) {
             menuManagementComponent.render();
         } else if (tabId === 'impersonation') {
             mainContent.innerHTML = `<section id="tab-impersonation" class="h-full overflow-y-auto custom-scrollbar pb-10 animate-in"></section>`;
-            impersonationComponent = new ImpersonationComponent('tab-impersonation');
+            impersonationComponent = new ImpersonationComponent('tab-impersonation', state);
             impersonationComponent.render();
         } else if (tabId === 'token-pool') {
             mainContent.innerHTML = `<section id="tab-token-pool" class="h-full overflow-y-auto custom-scrollbar pb-10 animate-in"></section>`;
             tokenPoolComponent = new TokenPoolComponent('tab-token-pool');
             tokenPoolComponent.render();
+        } else if (tabId === 'business-consulting') {
+            mainContent.innerHTML = `<section id="tab-business-consulting" class="h-full overflow-y-auto custom-scrollbar pb-10 animate-in"></section>`;
+            businessConsultingComponent = new BusinessConsultingComponent('tab-business-consulting', state);
         } else {
             mainContent.innerHTML = `<div class="p-10 text-center text-slate-400">Modul ${tabId} belum dimigrasi.</div>`;
         }
@@ -696,6 +702,7 @@ if (!loggedInUser) {
             'client-management': 'SUPER ADMIN',
             'ai-engine': 'SUPER ADMIN',
             'validation': 'SUPER ADMIN',
+            'business-consulting': 'SUPER ADMIN',
         };
         return menus.map(menu => {
             menu.category = categoryMap[menu.menu_id] || 'Uncategorized';
@@ -728,10 +735,11 @@ if (!loggedInUser) {
             { menu_id: 'validation', label: 'Validasi Pendaftar', icon: 'check-circle', roles: ['Super Admin'] },
             { menu_id: 'token-pool', label: 'Gudang Token', icon: 'key', roles: ['Super Admin'] },
             { menu_id: 'client-management', label: 'Client Management', icon: 'building-2', roles: ['Super Admin'] },
-            { menu_id: 'impersonation', label: 'Mode Penyamaran', icon: 'user-cog', roles: ['Super Admin'] },
+            { menu_id: 'impersonation', label: 'Login As', icon: 'user-cog', roles: ['Super Admin'] },
             { menu_id: 'menu-management', label: 'Menu Management', icon: 'list', roles: ['Super Admin'] },
             { menu_id: 'portfolio', label: 'Global Portofolio', icon: 'briefcase', roles: ['Super Admin', 'Developer'] },
-            { menu_id: 'ai-engine', label: 'AI Engine Config', icon: 'database', roles: ['Super Admin'] }
+            { menu_id: 'ai-engine', label: 'AI Engine Config', icon: 'database', roles: ['Super Admin'] },
+            { menu_id: 'business-consulting', label: 'AI Business Consulting', icon: 'line-chart', roles: ['Super Admin'] }
         ];
         return allMenus.filter(menu => menu.roles.includes('All') || menu.roles.includes(role));
     }

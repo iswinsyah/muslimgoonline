@@ -1,4 +1,5 @@
 import { ApiService } from '../api.js';
+import { formatWhatsAppNumber } from '../helpers.js';
 
 /**
  * Kumpulan Komponen AI & Fitur Canggih
@@ -6,22 +7,97 @@ import { ApiService } from '../api.js';
 
 // 1. LEAD ANALYZER
 export class LeadAnalyzerComponent {
-    constructor(containerId) {
+    constructor(containerId, state) {
         this.container = document.getElementById(containerId);
+        this.state = state;
     }
     render() {
         if(!this.container) return;
+
+        const leads = this.state && this.state.leads ? this.state.leads : [];
+        const leadOptions = leads.map(lead => {
+            const detailText = [
+                lead.phone ? lead.phone : '',
+                lead.job ? lead.job : ''
+            ].filter(Boolean).join(' - ');
+            return `<option value="${lead.id}">${lead.name} ${detailText ? `(${detailText})` : ''}</option>`;
+        }).join('');
+
         this.container.innerHTML = `
-            <div class="max-w-4xl mx-auto space-y-6 md:space-y-8">
-                <div class="bg-white p-6 md:p-10 rounded-[2rem] shadow-sm border border-slate-200 text-center">
-                    <div class="flex items-center justify-center mb-4 md:mb-6"><i data-lucide="brain-circuit" class="w-8 h-8 md:w-10 md:h-10 text-teal-600"></i></div>
-                    <h3 class="text-sm md:text-lg font-black text-slate-800 uppercase tracking-widest italic mb-4 md:mb-6">Lead Gestur Analyzer AI <span class="text-[9px] bg-blue-100 text-blue-600 px-2 py-1 rounded-full not-italic ml-2">Powered by MGO AI</span></h3>
-                    <textarea id="analyzer-input" placeholder="Tempel percakapan chat WA prospek di sini..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 text-xs md:text-sm font-medium h-40 md:h-48 outline-none focus:ring-2 focus:ring-teal-500 resize-none shadow-inner custom-scrollbar"></textarea>
-                    <button id="btn-analyze" class="w-full mt-4 md:mt-6 py-4 md:py-5 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl font-black text-xs uppercase shadow-xl active:scale-95 transition-all">Analisa Suhu Prospek</button>
+            <div class="max-w-4xl mx-auto space-y-6 md:space-y-8 animate-in">
+                <div class="bg-white p-6 md:p-10 rounded-[2rem] shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-center mb-4 md:mb-6">
+                        <div class="w-16 h-16 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center shadow-inner">
+                            <i data-lucide="brain-circuit" class="w-8 h-8 animate-pulse"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-sm md:text-lg font-black text-slate-800 uppercase tracking-widest italic mb-6 text-center">
+                        Lead Gestur Analyzer AI 
+                        <span class="text-[9px] bg-teal-100 text-teal-700 px-2.5 py-1 rounded-full not-italic ml-2 font-black uppercase tracking-wider">PRO Version</span>
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <!-- Dropdown Prospek -->
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Pilih Prospek dari Pipeline (Opsional)</label>
+                            <select id="analyzer-lead-select" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-teal-500 transition-all">
+                                <option value="">--- Pilih Prospek / Kosongkan ---</option>
+                                ${leadOptions}
+                            </select>
+                        </div>
+                        
+                        <!-- Input No Whatsapp Prospek -->
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">No. WhatsApp Prospek (Opsional)</label>
+                            <input type="text" id="analyzer-phone" placeholder="Contoh: 08123456789" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-teal-500 transition-all">
+                        </div>
+
+                        <!-- Info Tips AI -->
+                        <div class="bg-teal-50/50 border border-teal-100 p-4 rounded-2xl text-left text-xs text-teal-800 flex items-start gap-3">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-teal-600 shrink-0 mt-0.5 animate-pulse"></i>
+                            <div>
+                                <p class="font-black uppercase tracking-wider text-[9px] text-teal-700">Analisa Proaktif AI</p>
+                                <p class="mt-1 font-medium text-slate-600 leading-relaxed text-[11px]">
+                                    Memasukkan nomor WhatsApp atau memilih prospek dari pipeline membantu AI memetakan karakter keuangan, gaya hidup, dan rekam komunikasi secara lebih tajam & personal!
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Textarea Obrolan -->
+                        <div class="space-y-1 pt-2">
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Salinan Percakapan Obrolan (Opsional jika memilih prospek)</label>
+                            <textarea id="analyzer-input" placeholder="Tempel percakapan chat WA prospek di sini... (kosongkan jika ingin melakukan analisa profil awal saja)" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-5 text-xs md:text-sm font-medium h-32 md:h-40 outline-none focus:ring-2 focus:ring-teal-500 resize-none shadow-inner custom-scrollbar transition-all"></textarea>
+                        </div>
+                        
+                        <button id="btn-analyze" class="w-full mt-4 py-4 md:py-5 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl font-black text-xs uppercase shadow-xl hover:shadow-teal-600/20 active:scale-95 transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="brain-circuit" class="w-4 h-4"></i>
+                            <span>Analisa Karakter Prospek</span>
+                        </button>
+                    </div>
                 </div>
-                <div id="analyzer-result" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 hidden"></div>
+                
+                <!-- Container Hasil -->
+                <div id="analyzer-result" class="hidden"></div>
             </div>
         `;
+
+        const selectEl = this.container.querySelector('#analyzer-lead-select');
+        const phoneInput = this.container.querySelector('#analyzer-phone');
+        
+        selectEl.addEventListener('change', (e) => {
+            const selectedId = e.target.value;
+            if (selectedId) {
+                const lead = leads.find(l => l.id == selectedId);
+                if (lead && lead.phone) {
+                    phoneInput.value = lead.phone;
+                } else {
+                    phoneInput.value = '';
+                }
+            } else {
+                phoneInput.value = '';
+            }
+        });
+
         this.container.querySelector('#btn-analyze').addEventListener('click', () => this.analyze());
         if(window.lucide) window.lucide.createIcons();
     }
@@ -29,39 +105,261 @@ export class LeadAnalyzerComponent {
         const btn = this.container.querySelector('#btn-analyze');
         const res = this.container.querySelector('#analyzer-result');
         const input = this.container.querySelector('#analyzer-input').value;
-        if(!input) return alert('Masukkan teks chat dulu bos!');
+        const selectedLeadId = this.container.querySelector('#analyzer-lead-select').value;
+        const phoneInput = this.container.querySelector('#analyzer-phone').value;
+
+        if (!input && !selectedLeadId) {
+            return alert('Masukkan teks chat atau pilih prospek dari pipeline terlebih dahulu, Bos!');
+        }
         
-        const originalText = btn.innerText;
-        btn.innerText = "Sedang Menganalisa...";
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Sedang Menganalisa...</span>`;
         btn.disabled = true;
         res.classList.add('hidden');
+        if (window.lucide) window.lucide.createIcons();
 
         try {
-            const prompt = `Analisa percakapan chat prospek properti berikut. Tentukan skor "Suhu Prospek" (0-100%), Label (HOT/WARM/COLD), dan berikan 1 kalimat saran tindakan singkat. Format output JSON: {"score": "85%", "label": "HOT LEAD", "advice": "Saran..."}. Chat: "${input}"`;
+            // Build Context
+            let leadContext = "";
+            const leads = this.state && this.state.leads ? this.state.leads : [];
+            if (selectedLeadId) {
+                const lead = leads.find(l => l.id == selectedLeadId);
+                if (lead) {
+                    leadContext = `Informasi Prospek:
+- Nama: ${lead.name}
+- Pekerjaan: ${lead.job || 'Tidak diisi'}
+- Segmen Tertarik: ${lead.segment || 'Tidak diisi'}
+- Status Pipeline: ${lead.status || 'Tidak diisi'}
+- WhatsApp: ${formatWhatsAppNumber(lead.phone) || 'Tidak diisi'}`;
+                }
+            } else if (phoneInput) {
+                leadContext = `Informasi Prospek:
+- WhatsApp: ${formatWhatsAppNumber(phoneInput)}`;
+            }
+
+            // Ambil memori sukses terdekat (jika ada developer_id)
+            let pastLearningsContext = "";
+            const devId = this.state.currentUser.developer_id;
+            if (devId) {
+                try {
+                    const learnings = await ApiService.getLearnings(devId);
+                    if (learnings && learnings.length > 0) {
+                        pastLearningsContext = "\nFORMULA & TAKTIK SUKSES CLOSING YANG TERBUKTI DI PERUSAHAAN ANDA:\n";
+                        learnings.forEach((item, index) => {
+                            pastLearningsContext += `${index + 1}. Pekerjaan Pembeli=${item.buyer_job}, Segmen Terbeli=${item.property_segment}\n   - Analisis Karakter: ${item.objections}\n   - Taktik Closing Sukses: ${item.successful_tactics}\n`;
+                        });
+                        pastLearningsContext += "\nCATATAN AI: Prioritaskan menggunakan dan mengadaptasi taktik sukses di atas jika kondisi/karakter prospek saat ini mirip!\n";
+                    }
+                } catch (e) {
+                    console.warn("Gagal memuat memori sukses AI:", e);
+                }
+            }
+
+            let prompt = "";
+            if (input) {
+                // Obrolan chat tersedia - Analisis Berbasis Chat
+                prompt = `Analisa prospek properti berikut berdasarkan percakapan chat, konteks data prospek, dan formula sukses closing terdahulu di perusahaan Anda.
+
+${leadContext ? leadContext + "\n" : ""}
+${pastLearningsContext ? pastLearningsContext + "\n" : ""}
+Percakapan Chat:
+"${input}"
+
+Tugas Anda:
+1. Tentukan tingkat "Suhu Prospek" (dalam persentase 0-100%).
+2. Berikan Label (HOT LEAD / WARM LEAD / COLD LEAD).
+3. Analisis Profil Kepribadian & Gaya Hidup prospek tersebut secara singkat (maksimal 2 kalimat).
+4. Analisis Estimasi Kemampuan Finansial prospek secara logis berdasarkan pekerjaannya atau isi chat (maksimal 2 kalimat).
+5. Berikan 3 poin penting Saran Taktik Closing yang spesifik untuk menghadapi kepribadian dan kondisi finansial prospek ini.
+6. Buatkan 1 Draf Pesan Balasan WhatsApp (Syariah) yang sangat persuasif, bersahabat, santun, dan siap dikirimkan untuk merespons chat terakhir prospek tersebut.
+
+Format output WAJIB berupa JSON murni dengan key sebagai berikut (tanpa pembungkus markdown \`\`\`json):
+{
+  "score": "Persentase (contoh: 85%)",
+  "label": "HOT LEAD / WARM LEAD / COLD LEAD",
+  "personality": "Analisis kepribadian & gaya hidup...",
+  "financial": "Estimasi kemampuan finansial...",
+  "closing_tactics": [
+    "Poin taktik closing 1",
+    "Poin taktik closing 2",
+    "Poin taktik closing 3"
+  ],
+  "draft_reply": "Draf pesan balasan WhatsApp syariah yang persuasif..."
+}
+`;
+            } else {
+                // Tidak ada obrolan chat - Analisis Berbasis Profil Awal
+                prompt = `Lakukan analisis awal Buyer Persona prospek properti berikut berdasarkan data profil pekerjaannya, segmen rumah yang diminati, dan formula sukses closing terdahulu di perusahaan Anda.
+*(Catatan: Belum ada rekaman percakapan chat dengan prospek ini)*
+
+${leadContext ? leadContext + "\n" : ""}
+${pastLearningsContext ? pastLearningsContext + "\n" : ""}
+
+Tugas Anda:
+1. Tentukan tingkat perkiraan "Suhu Prospek" awal berdasarkan data profil pekerjaannya (dalam persentase 0-100%).
+2. Berikan Label awal (HOT LEAD / WARM LEAD / COLD LEAD).
+3. Analisis Profil Kepribadian awal & Gaya Hidup berdasarkan jenis pekerjaannya (maksimal 2 kalimat).
+4. Analisis Estimasi Kemampuan Finansial prospek secara logis berdasarkan tipe pekerjaan dan segmen rumah yang diminatinya (maksimal 2 kalimat).
+5. Berikan 3 poin penting Saran Taktik Pendekatan Awal yang paling disukai oleh profil kepribadian dan latar belakang ini.
+6. Buatkan 1 Draf Pesan Sapaan WhatsApp Pertama (Syariah) yang sangat persuasif, santun, bersahabat, dan siap dikirimkan untuk mulai menyapa prospek ini.
+
+Format output WAJIB berupa JSON murni dengan key sebagai berikut (tanpa pembungkus markdown \`\`\`json):
+{
+  "score": "Persentase (contoh: 50%)",
+  "label": "HOT LEAD / WARM LEAD / COLD LEAD",
+  "personality": "Analisis kepribadian & gaya hidup awal...",
+  "financial": "Estimasi kemampuan finansial...",
+  "closing_tactics": [
+    "Taktik pendekatan awal 1",
+    "Taktik pendekatan awal 2",
+    "Taktik pendekatan awal 3"
+  ],
+  "draft_reply": "Draf pesan sapaan pertama WhatsApp syariah yang persuasif..."
+}
+`;
+            }
             
             const response = await ApiService.generateAIContent(prompt);
             
-            // Parsing hasil (Gemini kadang mengembalikan markdown json, kita bersihkan)
+            // Parsing hasil
             let cleanJson = (response.result || '').replace(/```json|```/g, '').trim();
-            let data = { score: "N/A", label: "UNKNOWN", advice: "Gagal mem-parsing respon AI." };
-            try { data = JSON.parse(cleanJson); } catch(e) { console.error("Gagal parsing JSON dari AI:", e); }
+            let data = { 
+                score: "N/A", 
+                label: "UNKNOWN", 
+                personality: "Gagal menganalisa kepribadian.", 
+                financial: "Gagal menganalisa kemampuan finansial.", 
+                closing_tactics: [], 
+                draft_reply: "Gagal membuat draf pesan balasan." 
+            };
+            try { 
+                data = JSON.parse(cleanJson); 
+            } catch(e) { 
+                console.error("Gagal parsing JSON dari AI:", e); 
+                // Fallback parsing jika AI tidak mengembalikan JSON murni
+                const matchScore = cleanJson.match(/"score"\s*:\s*"([^"]+)"/);
+                const matchLabel = cleanJson.match(/"label"\s*:\s*"([^"]+)"/);
+                const matchAdvice = cleanJson.match(/"advice"\s*:\s*"([^"]+)"/) || cleanJson.match(/"draft_reply"\s*:\s*"([^"]+)"/);
+                if (matchScore) data.score = matchScore[1];
+                if (matchLabel) data.label = matchLabel[1];
+                if (matchAdvice) data.draft_reply = matchAdvice[1];
+            }
 
             res.innerHTML = `
-                <div class="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border text-center shadow-sm">
-                    <p class="text-3xl md:text-4xl font-black text-teal-600">${data.score || 'N/A'}</p>
-                    <p class="text-[9px] md:text-[10px] font-black text-orange-600 uppercase tracking-widest mt-2">${data.label || 'ANALYSIS DONE'}</p>
-                </div>
-                <div class="bg-slate-900 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] text-white italic text-[10px] md:text-xs leading-relaxed flex items-center shadow-xl">
-                    "${data.advice || 'Tidak ada saran.'}"
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Kolom 1: Skor & Info Dasar -->
+                    <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col justify-between text-center relative overflow-hidden">
+                        <div class="absolute -top-10 -right-10 w-24 h-24 bg-teal-50 rounded-full -z-10"></div>
+                        <div>
+                            <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Suhu Prospek</p>
+                            <p class="text-5xl font-black text-teal-600 mt-4">${data.score || 'N/A'}</p>
+                            <span class="inline-block mt-3 px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-[9px] font-black uppercase tracking-wider">${data.label || 'ANALYSIS'}</span>
+                        </div>
+                        <div class="mt-6 border-t pt-6 text-left space-y-4">
+                            <div>
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="user" class="w-3.5 h-3.5 text-teal-600"></i> Kepribadian & Gaya Hidup</p>
+                                <p class="text-xs text-slate-600 font-medium mt-1 leading-relaxed">${data.personality || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="wallet" class="w-3.5 h-3.5 text-teal-600"></i> Kemampuan Finansial</p>
+                                <p class="text-xs text-slate-600 font-medium mt-1 leading-relaxed">${data.financial || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kolom 2: Taktik Closing -->
+                    <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm md:col-span-2 flex flex-col justify-between">
+                        <div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="shield-check" class="w-4 h-4 text-teal-600"></i> Taktik Closing Yang Disarankan AI</p>
+                            <ul class="mt-4 space-y-3">
+                                ${Array.isArray(data.closing_tactics) && data.closing_tactics.length > 0 
+                                  ? data.closing_tactics.map(tactic => `
+                                    <li class="flex items-start gap-3 text-xs text-slate-700 font-medium leading-relaxed">
+                                        <i data-lucide="check-circle" class="w-4 h-4 text-teal-600 shrink-0 mt-0.5"></i>
+                                        <span>${tactic}</span>
+                                    </li>
+                                  `).join('')
+                                  : `<li class="flex items-start gap-3 text-xs text-slate-700 font-medium leading-relaxed">
+                                        <i data-lucide="check-circle" class="w-4 h-4 text-teal-600 shrink-0 mt-0.5"></i>
+                                        <span>Tawarkan penjelasan unit syariah secara bertahap dan ramah.</span>
+                                     </li>`
+                                }
+                            </ul>
+                        </div>
+                        <div class="mt-6 border-t pt-6 bg-slate-50 -mx-6 md:-mx-8 p-6 md:p-8 -mb-6 md:-mb-8 rounded-b-[2rem]">
+                            <div class="flex items-center justify-between">
+                                <p class="text-[10px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="message-square" class="w-4 h-4 text-orange-600"></i> Draf Balasan Chat (Syariah)</p>
+                                <div class="flex items-center gap-2">
+                                    <button id="btn-save-learning" class="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1 transition-all active:scale-95" title="Simpan pola sukses ini ke AI Brain untuk pembelajaran bersama">
+                                        <i data-lucide="brain" class="w-3.5 h-3.5"></i>
+                                        <span>Simpan Taktik Sukses</span>
+                                    </button>
+                                    <button id="btn-copy-draft" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1 transition-all active:scale-95">
+                                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                        <span>Salin Draf</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-3 bg-white border border-slate-200 p-4 rounded-xl text-xs text-slate-700 font-medium leading-relaxed italic whitespace-pre-wrap">"${data.draft_reply || 'Tidak ada draf pesan.'}"</div>
+                        </div>
+                    </div>
                 </div>
             `;
             res.classList.remove('hidden');
+            
+            // Attach copy action listener
+            const copyBtn = res.querySelector('#btn-copy-draft');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(data.draft_reply || '');
+                    const originalBtnContent = copyBtn.innerHTML;
+                    copyBtn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-green-600"></i><span class="text-green-600">Tersalin!</span>`;
+                    if (window.lucide) window.lucide.createIcons();
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalBtnContent;
+                        if (window.lucide) window.lucide.createIcons();
+                    }, 2000);
+                });
+            }
+
+            // Attach save learning action listener
+            const saveLearningBtn = res.querySelector('#btn-save-learning');
+            if (saveLearningBtn) {
+                saveLearningBtn.addEventListener('click', async () => {
+                    try {
+                        const selectedLead = selectedLeadId ? leads.find(l => l.id == selectedLeadId) : null;
+                        const learningData = {
+                            lead_id: selectedLeadId || null,
+                            buyer_job: selectedLead ? (selectedLead.job || 'Unknown') : 'Unknown',
+                            property_segment: selectedLead ? (selectedLead.segment || 'Unknown') : 'Unknown',
+                            objections: data.personality || 'Unknown',
+                            successful_tactics: Array.isArray(data.closing_tactics) ? data.closing_tactics.join("\n") : (data.advice || ''),
+                            chat_snippet: input
+                        };
+                        saveLearningBtn.disabled = true;
+                        saveLearningBtn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin mr-1"></i><span>Menyimpan...</span>`;
+                        if (window.lucide) window.lucide.createIcons();
+
+                        await ApiService.saveLearning(learningData, this.state.currentUser.id);
+                        
+                        saveLearningBtn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5 text-green-600 mr-1"></i><span class="text-green-600">AI Brain Cerdas!</span>`;
+                        if (window.lucide) window.lucide.createIcons();
+                    } catch (err) {
+                        alert("Gagal menyimpan ke AI Brain: " + err.message);
+                        saveLearningBtn.disabled = false;
+                        saveLearningBtn.innerHTML = `<i data-lucide="brain" class="w-3.5 h-3.5 mr-1"></i><span>Simpan Taktik Sukses</span>`;
+                        if (window.lucide) window.lucide.createIcons();
+                    }
+                });
+            }
+
+            if(window.lucide) window.lucide.createIcons();
         } catch (error) {
-            res.innerHTML = `<div class="col-span-1 md:col-span-2 p-6 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-xs"><strong class="font-bold">Gagal Analisa AI:</strong><br>${error.message}</div>`;
+            res.innerHTML = `<div class="p-6 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-xs"><strong class="font-bold">Gagal Analisa AI:</strong><br>${error.message}</div>`;
             res.classList.remove('hidden');
         } finally {
-            btn.innerText = originalText;
+            btn.innerHTML = originalHTML;
             btn.disabled = false;
+            if(window.lucide) window.lucide.createIcons();
         }
     }
 }
@@ -350,8 +648,10 @@ export class PersonaInsightComponent {
 
         // Hitung Statistik Real-time dari Data Leads
         const leads = this.state.leads || [];
+        const closingLeads = leads.filter(l => l.status === 'CLOSING');
         const savedInsight = this.state.developerSettings?.ai_persona_insight;
         const totalLeads = leads.length;
+        const totalClosing = closingLeads.length;
 
         if (totalLeads === 0) {
             this.container.innerHTML = `<div class="p-10 text-center text-slate-400">Belum ada data lead untuk dianalisis. Silakan input data lead terlebih dahulu.</div>`;
@@ -359,34 +659,50 @@ export class PersonaInsightComponent {
         }
 
         // Fungsi helper untuk mencari nilai terbanyak (modus)
-        const getTop = (field) => {
+        const getTop = (leadsList, field) => {
             const counts = {};
-            leads.forEach(l => {
+            leadsList.forEach(l => {
                 const val = l[field] || 'Unknown';
                 counts[val] = (counts[val] || 0) + 1;
             });
-            return Object.entries(counts).sort((a,b) => b[1] - a[1])[0]?.[0] || '-';
+            return Object.entries(counts).sort((a,b) => b[1] - a[1])[0]?.[0] || 'Unknown';
         };
 
-        const topJob = getTop('job');
-        const topSegment = getTop('segment');
-        const topChannel = getTop('channel'); // Mengganti Domisili dengan Channel karena data domisili tidak ada di tabel
+        const topJob = getTop(leads, 'job');
+        const topSegment = getTop(leads, 'segment');
+        const topChannel = getTop(leads, 'channel');
+
+        const topClosingJob = totalClosing > 0 ? getTop(closingLeads, 'job') : topJob;
+        const topClosingSegment = totalClosing > 0 ? getTop(closingLeads, 'segment') : topSegment;
+        const topClosingChannel = totalClosing > 0 ? getTop(closingLeads, 'channel') : topChannel;
 
         this.container.innerHTML = `
             <div class="max-w-6xl mx-auto space-y-6">
                 <div class="bg-teal-900 rounded-[2rem] p-8 md:p-10 text-white shadow-xl relative overflow-hidden text-center md:text-left">
                     <div class="absolute top-0 right-0 p-8 opacity-10 hidden md:block"><i data-lucide="user-check" class="w-24 h-24"></i></div>
                     <h3 class="text-xl md:text-2xl font-black mb-2 italic leading-tight uppercase tracking-tighter">Global AI Buyer Persona</h3>
-                    <p class="text-[10px] md:text-xs opacity-70 font-medium italic max-w-lg mx-auto md:mx-0">"Data dari <strong class="text-orange-400">${totalLeads} Lead</strong> (Akumulasi Tim) dianalisis otomatis untuk membedah psikologi & minat pasar Anda."</p>
+                    <p class="text-[10px] md:text-xs opacity-70 font-medium italic max-w-lg mx-auto md:mx-0">"Data dari <strong class="text-orange-400">${totalLeads} Lead</strong> (Closing: <strong class="text-teal-400">${totalClosing}</strong>) dianalisis otomatis untuk membedah psikologi & minat pasar Anda."</p>
                     <button id="btn-analyze-persona" class="mt-6 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg transition-all active:scale-95">
                         <i data-lucide="sparkles" class="w-3 h-3 inline mr-1"></i> Generate AI Analysis
                     </button>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
-                    <div class="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200 text-center"><p class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase mb-3 tracking-widest">Top Pekerjaan</p><p class="text-xl md:text-2xl font-black text-slate-800 tracking-tighter px-2 truncate">${topJob}</p></div>
-                    <div class="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200 text-center"><p class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase mb-3 tracking-widest">Segmen Dominan</p><p class="text-xl md:text-2xl font-black text-teal-600 tracking-tighter px-2 truncate">${topSegment}</p></div>
-                    <div class="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200 text-center"><p class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase mb-3 tracking-widest">Top Channel</p><p class="text-xl md:text-2xl font-black text-orange-500 tracking-tighter px-2 truncate">${topChannel}</p></div>
+                    <div class="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200 text-center">
+                        <p class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase mb-3 tracking-widest">Pekerjaan Utama</p>
+                        <p class="text-xl md:text-2xl font-black text-slate-800 tracking-tighter px-2 truncate">${topJob}</p>
+                        <p class="text-[9px] text-teal-600 font-bold mt-1 uppercase">Closing: ${topClosingJob}</p>
+                    </div>
+                    <div class="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200 text-center">
+                        <p class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase mb-3 tracking-widest">Segmen Dominan</p>
+                        <p class="text-xl md:text-2xl font-black text-teal-600 tracking-tighter px-2 truncate">${topSegment}</p>
+                        <p class="text-[9px] text-teal-600 font-bold mt-1 uppercase">Closing: ${topClosingSegment}</p>
+                    </div>
+                    <div class="bg-white p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-slate-200 text-center">
+                        <p class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase mb-3 tracking-widest">Top Channel</p>
+                        <p class="text-xl md:text-2xl font-black text-orange-500 tracking-tighter px-2 truncate">${topChannel}</p>
+                        <p class="text-[9px] text-teal-600 font-bold mt-1 uppercase">Closing: ${topClosingChannel}</p>
+                    </div>
                 </div>
 
                 <!-- AI Result Grid -->
@@ -422,7 +738,9 @@ export class PersonaInsightComponent {
             </div>
         `;
         
-        this.container.querySelector('#btn-analyze-persona').addEventListener('click', () => this.analyzePersona(topJob, topSegment, topChannel));
+        this.container.querySelector('#btn-analyze-persona').addEventListener('click', () => {
+            this.analyzePersona(topJob, topSegment, topChannel, topClosingJob, topClosingSegment, topClosingChannel);
+        });
         
         // Jika ada data tersimpan, langsung tampilkan
         if (savedInsight) {
@@ -432,7 +750,7 @@ export class PersonaInsightComponent {
         if(window.lucide) window.lucide.createIcons();
     }
 
-    async analyzePersona(job, segment, channel) {
+    async analyzePersona(job, segment, channel, closingJob, closingSegment, closingChannel) {
         const btn = this.container.querySelector('#btn-analyze-persona');
         const resultGrid = this.container.querySelector('#persona-result-grid');
         const personaContent = this.container.querySelector('#persona-content');
@@ -444,11 +762,24 @@ export class PersonaInsightComponent {
         resultGrid.classList.add('hidden');
         
         try {
-            const prompt = `Sebagai konsultan properti ahli, analisa Buyer Persona berdasarkan data dominan berikut: Pekerjaan=${job}, Segmen=${segment}, Media Masuk=${channel}.
+            const prompt = `Sebagai konsultan properti syariah ahli, analisa Buyer Persona berdasarkan data demografi real-time berikut:
+
+Data Minat Umum (Pipeline):
+- Pekerjaan Terbanyak: ${job}
+- Segmen Tertarik Terbanyak: ${segment}
+- Media Masuk Terbanyak: ${channel}
+
+Data Pembeli Konkrit (Closing):
+- Pekerjaan Pembeli: ${closingJob}
+- Segmen Rumah Terbeli: ${closingSegment}
+- Media Masuk Pembeli: ${closingChannel}
+
+Bandingkan profil orang yang berminat (data minat umum) dengan orang yang benar-benar melakukan closing (pembeli konkrit). Rumuskan analisis persona yang presisi berdasarkan perbandingan ini.
 
 Berikan output dalam format JSON tunggal yang bisa di-parse, dengan struktur: {"personaInsight": "...", "channelRecommendations": [...]}.
 
 1.  Untuk key "personaInsight" (string), berikan insight mendalam mengenai:
+    - Analisis Perbedaan / Pola antara Peminat vs Pembeli Riil.
     - Psikologi & Pemicu Pembelian (Pain & Gain).
     - Gaya Komunikasi yang disukai.
     - Rekomendasi Strategi Closing.
@@ -459,7 +790,7 @@ Berikan output dalam format JSON tunggal yang bisa di-parse, dengan struktur: {"
     - "reason" (string): 1 kalimat alasan singkat mengapa channel itu cocok.
 
 Contoh output:
-{"personaInsight": "1. Psikologi: ...\\n2. Gaya Komunikasi: ...", "channelRecommendations": [{"channel": "Facebook Ads", "reason": "Menjangkau demografi spesifik berdasarkan pekerjaan dan minat."}, ...]}
+{"personaInsight": "1. Perbandingan Peminat vs Pembeli: ...\\n2. Psikologi: ...\\n3. Gaya Komunikasi: ...", "channelRecommendations": [{"channel": "Facebook Ads", "reason": "Menjangkau demografi spesifik berdasarkan pekerjaan dan minat."}, ...]}
 `;
 
             const response = await ApiService.generateAIContent(prompt);

@@ -2,16 +2,17 @@ import { ApiService } from '../api.js';
 import { UI } from '../ui.js';
 
 export class ImpersonationComponent {
-    constructor(elementId) {
+    constructor(elementId, state) {
         this.container = document.getElementById(elementId);
         this.ui = new UI();
+        this.state = state;
         this.users = [];
     }
 
     async render() {
         this.container.innerHTML = this.ui.renderLoading('Memuat daftar pengguna...');
         try {
-            this.users = await ApiService.getAllUsers();
+            this.users = await ApiService.getAllUsers(this.state.currentUser.id);
             this.container.innerHTML = this.renderUserList();
             this.attachEventListeners();
         } catch (error) {
@@ -38,7 +39,7 @@ export class ImpersonationComponent {
 
         return `
             <div class="bg-white p-6 md:p-8 rounded-2xl shadow-md">
-                <h2 class="text-xl font-black text-slate-800 uppercase tracking-wider">Mode Penyamaran (Login As)</h2>
+                <h2 class="text-xl font-black text-slate-800 uppercase tracking-wider">Login As</h2>
                 <p class="text-sm text-slate-500 mt-1">Pilih pengguna untuk login sebagai mereka dan melihat aplikasi dari sudut pandang mereka untuk debugging.</p>
                 <div class="mt-4">
                     <input type="text" id="user-search-input" placeholder="Cari nama atau username..." class="w-full bg-slate-50 border p-3 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-[#2845D6]">
@@ -99,7 +100,7 @@ export class ImpersonationComponent {
 
         try {
             // Ambil data lengkap user dari server untuk memastikan sesi valid
-            const fullTargetUserResponse = await ApiService.getUserForImpersonation(userId);
+            const fullTargetUserResponse = await ApiService.getUserForImpersonation(userId, this.state.currentUser.id);
             const fullTargetUser = fullTargetUserResponse.user;
 
             // Simpan sesi Super Admin saat ini

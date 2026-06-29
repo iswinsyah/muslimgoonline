@@ -13,7 +13,7 @@ $nama_user = trim($data['nama_user'] ?? '');
 $username = trim($data['username'] ?? '');
 $password = trim($data['password'] ?? '');
 $email = trim($data['email'] ?? '');
-$no_whatsapp = trim($data['no_whatsapp'] ?? '');
+$no_whatsapp = isset($data['no_whatsapp']) ? formatWhatsAppNumber($data['no_whatsapp']) : '';
 $role = trim($data['role'] ?? '');
 
 if (empty($nama_user) || empty($username) || empty($password) || empty($email) || empty($no_whatsapp) || empty($role)) {

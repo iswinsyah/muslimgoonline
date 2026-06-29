@@ -93,7 +93,7 @@ try {
             'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 150
         ],
         [
-            'menu_id' => 'impersonation', 'label' => 'Mode Penyamaran', 'icon' => 'user-cog',
+            'menu_id' => 'impersonation', 'label' => 'Login As', 'icon' => 'user-cog',
             'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 160
         ],
         [
@@ -107,6 +107,10 @@ try {
         [
             'menu_id' => 'ai-engine', 'label' => 'AI Engine Config', 'icon' => 'database',
             'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 190
+        ],
+        [
+            'menu_id' => 'business-consulting', 'label' => 'AI Business Consulting', 'icon' => 'line-chart',
+            'allowed_roles' => json_encode(['Super Admin']), 'sort_order' => 200
         ]
     ];
 
