@@ -6,7 +6,7 @@ import { PipelineComponent } from './components/pipeline.js';
 import { PortfolioComponent } from './components/portfolio.js';
 import { ReportingComponent } from './components/reporting.js';
 import { ClientManagementComponent } from './components/client_management.js';
-import { LeadAnalyzerComponent, CreativeSuiteComponent, ObjectionGenComponent, PersonaInsightComponent, AiEngineConfigComponent, ContentCalendarGeneratorComponent } from './components/ai_features.js?v=1.1.3';
+import { LeadAnalyzerComponent, CreativeSuiteComponent, ObjectionGenComponent, PersonaInsightComponent, AiEngineConfigComponent, ContentCalendarGeneratorComponent } from './components/ai_features.js?v=1.1.4';
 import { TasksComponent } from './components/tasks.js';
 import { CalendarComponent } from './components/calendar.js';
 import { ValidationComponent } from './components/validation.js';

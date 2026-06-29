@@ -695,6 +695,7 @@ export class PersonaInsightComponent {
         this.container = document.getElementById(containerId);
         this.state = state;
         this.lastAIResult = null; // Untuk menyimpan hasil AI sementara
+        this.mode = 'manual'; // 'manual' atau 'auto'
     }
 
     render() {
@@ -734,11 +735,51 @@ export class PersonaInsightComponent {
             <div class="max-w-6xl mx-auto space-y-6">
                 <div class="bg-teal-900 rounded-[2rem] p-8 md:p-10 text-white shadow-xl relative overflow-hidden text-center md:text-left">
                     <div class="absolute top-0 right-0 p-8 opacity-10 hidden md:block"><i data-lucide="user-check" class="w-24 h-24"></i></div>
-                    <h3 class="text-xl md:text-2xl font-black mb-2 italic leading-tight uppercase tracking-tighter">Global AI Buyer Persona</h3>
-                    <p class="text-[10px] md:text-xs opacity-70 font-medium italic max-w-lg mx-auto md:mx-0">"Data dari <strong class="text-orange-400">${totalLeads} Lead</strong> (Closing: <strong class="text-teal-400">${totalClosing}</strong>) dianalisis otomatis untuk membedah psikologi & minat pasar Anda."</p>
-                    <button id="btn-analyze-persona" class="mt-6 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg transition-all active:scale-95">
-                        <i data-lucide="sparkles" class="w-3 h-3 inline mr-1"></i> Generate AI Analysis
-                    </button>
+                    <h3 class="text-xl md:text-2xl font-black mb-2 italic leading-tight uppercase tracking-tighter">Global AI Buyer Persona & Agent</h3>
+                    <p class="text-[10px] md:text-xs opacity-70 font-medium italic max-w-lg mx-auto md:mx-0 mb-6">"Data dari <strong class="text-orange-400">${totalLeads} Lead</strong> (Closing: <strong class="text-teal-400">${totalClosing}</strong>) dianalisis otomatis untuk membedah psikologi & menyusun jadwal promosi."</p>
+                    
+                    <!-- Toggle AI Agent Mode -->
+                    <div class="flex items-center justify-center md:justify-start gap-4 mb-6">
+                        <span class="text-[10px] font-black text-teal-200 uppercase tracking-widest">Mode AI Agent:</span>
+                        <div class="inline-flex rounded-xl p-0.5 bg-slate-950/40 border border-white/10">
+                            <button id="toggle-manual" class="px-4 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all ${this.mode === 'manual' ? 'bg-orange-500 text-white shadow-md' : 'text-teal-300 hover:text-white'}">Manual</button>
+                            <button id="toggle-auto" class="px-4 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all ${this.mode === 'auto' ? 'bg-orange-500 text-white shadow-md' : 'text-teal-300 hover:text-white'}">Otomatis</button>
+                        </div>
+                    </div>
+
+                    <!-- Area Manual -->
+                    <div id="manual-mode-area" class="${this.mode === 'manual' ? 'block' : 'hidden'}">
+                        <button id="btn-analyze-persona" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg transition-all active:scale-95 flex items-center justify-center gap-1.5 mx-auto md:mx-0">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                            <span>Generate Buyer Persona</span>
+                        </button>
+                        <p class="text-[9px] text-teal-200 mt-2.5 italic font-semibold">AI Agent akan otomatis menyusun kalender konten 1 pekan (7 hari) secara default.</p>
+                    </div>
+
+                    <!-- Area Otomatis -->
+                    <div id="auto-mode-area" class="${this.mode === 'auto' ? 'block' : 'hidden'}">
+                        <div class="flex flex-col sm:flex-row items-center gap-3 justify-center md:justify-start">
+                            <select id="auto-interval" class="bg-teal-950 border border-teal-700 text-white p-3 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-orange-500 w-full sm:w-auto">
+                                <option value="7">Generate Tiap 1 Pekan (7 Hari)</option>
+                                <option value="30">Generate Tiap 1 Bulan (30 Hari)</option>
+                            </select>
+                            <button id="btn-activate-agent" class="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg transition-all active:scale-95 flex items-center justify-center gap-1.5">
+                                <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                                <span>Aktifkan AI Agent</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Agent Console -->
+                <div id="agent-console" class="hidden bg-slate-950 border border-slate-800 rounded-[2rem] p-6 text-left font-mono text-[10px] md:text-xs text-teal-400 max-w-3xl mx-auto space-y-2 shadow-2xl relative overflow-hidden">
+                    <div class="flex items-center justify-between border-b border-slate-900 pb-3 mb-3 text-slate-400">
+                        <span class="flex items-center gap-2 font-black uppercase text-[9px] tracking-widest text-slate-300"><i data-lucide="cpu" class="w-4 h-4 text-orange-400 animate-spin"></i> MGO AI Agent Workflow Console</span>
+                        <span class="text-[8px] bg-slate-900 px-2.5 py-1 rounded-full text-orange-400 uppercase font-black tracking-widest border border-white/5 animate-pulse">Running</span>
+                    </div>
+                    <div id="agent-log-lines" class="space-y-2 h-44 overflow-y-auto custom-scrollbar pr-2">
+                        <!-- Logs -->
+                    </div>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
@@ -791,10 +832,38 @@ export class PersonaInsightComponent {
                 <div id="save-button-container" class="text-center"></div>
             </div>
         `;
-        
-        this.container.querySelector('#btn-analyze-persona').addEventListener('click', () => {
-            this.analyzePersona(topJob, topSegment, topChannel, topClosingJob, topClosingSegment, topClosingChannel);
+
+        const toggleManualBtn = this.container.querySelector('#toggle-manual');
+        const toggleAutoBtn = this.container.querySelector('#toggle-auto');
+        const manualArea = this.container.querySelector('#manual-mode-area');
+        const autoArea = this.container.querySelector('#auto-mode-area');
+
+        toggleManualBtn.addEventListener('click', () => {
+            this.mode = 'manual';
+            toggleManualBtn.className = "px-4 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all bg-orange-500 text-white shadow-md";
+            toggleAutoBtn.className = "px-4 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all text-teal-300 hover:text-white";
+            manualArea.classList.remove('hidden');
+            autoArea.classList.add('hidden');
         });
+
+        toggleAutoBtn.addEventListener('click', () => {
+            this.mode = 'auto';
+            toggleAutoBtn.className = "px-4 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all bg-orange-500 text-white shadow-md";
+            toggleManualBtn.className = "px-4 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all text-teal-300 hover:text-white";
+            autoArea.classList.remove('hidden');
+            manualArea.classList.add('hidden');
+        });
+
+        this.container.querySelector('#btn-analyze-persona').addEventListener('click', () => {
+            this.runAgentWorkflow(7);
+        });
+
+        if (this.container.querySelector('#btn-activate-agent')) {
+            this.container.querySelector('#btn-activate-agent').addEventListener('click', () => {
+                const duration = parseInt(this.container.querySelector('#auto-interval').value);
+                this.runAgentWorkflow(duration);
+            });
+        }
         
         // Jika ada data tersimpan, langsung tampilkan
         if (savedInsight) {
@@ -804,19 +873,74 @@ export class PersonaInsightComponent {
         if(window.lucide) window.lucide.createIcons();
     }
 
-    async analyzePersona(job, segment, channel, closingJob, closingSegment, closingChannel) {
-        const btn = this.container.querySelector('#btn-analyze-persona');
+    async runAgentWorkflow(duration) {
+        const consoleEl = this.container.querySelector('#agent-console');
+        const logLinesEl = this.container.querySelector('#agent-log-lines');
         const resultGrid = this.container.querySelector('#persona-result-grid');
-        const personaContent = this.container.querySelector('#persona-content');
-        const channelContent = this.container.querySelector('#channel-content');
+        const btnManual = this.container.querySelector('#btn-analyze-persona');
+        const btnAuto = this.container.querySelector('#btn-activate-agent');
         
-        const originalText = btn.innerHTML;
-        btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 inline mr-1 animate-spin"></i> Menganalisa...`;
-        btn.disabled = true;
         resultGrid.classList.add('hidden');
+        consoleEl.classList.remove('hidden');
+        logLinesEl.innerHTML = '';
         
+        if (btnManual) btnManual.disabled = true;
+        if (btnAuto) btnAuto.disabled = true;
+
+        const addLog = (msg, type = 'info') => {
+            const time = new Date().toLocaleTimeString('id-ID');
+            let icon = 'info';
+            let color = 'text-slate-400';
+            if (type === 'start') { icon = 'play'; color = 'text-teal-400 font-bold'; }
+            if (type === 'success') { icon = 'check-circle'; color = 'text-green-400 font-semibold'; }
+            if (type === 'gemini') { icon = 'sparkles'; color = 'text-purple-400'; }
+            if (type === 'db') { icon = 'database'; color = 'text-blue-400'; }
+            if (type === 'complete') { icon = 'trophy'; color = 'text-orange-400 font-black'; }
+            
+            const line = document.createElement('div');
+            line.className = `flex items-start gap-2.5 ${color} animate-in fade-in-50 duration-300`;
+            line.innerHTML = `
+                <span class="text-slate-600 font-mono text-[9px] shrink-0 mt-0.5">[${time}]</span>
+                <i data-lucide="${icon}" class="w-3.5 h-3.5 shrink-0 mt-0.5"></i>
+                <span class="leading-relaxed font-medium text-[11px] font-sans">${msg}</span>
+            `;
+            logLinesEl.appendChild(line);
+            logLinesEl.scrollTop = logLinesEl.scrollHeight;
+            if (window.lucide) window.lucide.createIcons();
+        };
+
+        // Hitung Data Pipeline
+        const leads = this.state.leads || [];
+        const closingLeads = leads.filter(l => l.status === 'CLOSING');
+        const totalLeads = leads.length;
+        const totalClosing = closingLeads.length;
+
+        const getTop = (leadsList, field) => {
+            const counts = {};
+            leadsList.forEach(l => {
+                const val = l[field] || 'Unknown';
+                counts[val] = (counts[val] || 0) + 1;
+            });
+            return Object.entries(counts).sort((a,b) => b[1] - a[1])[0]?.[0] || 'Unknown';
+        };
+
+        const job = getTop(leads, 'job');
+        const segment = getTop(leads, 'segment');
+        const channel = getTop(leads, 'channel');
+        const closingJob = totalClosing > 0 ? getTop(closingLeads, 'job') : job;
+        const closingSegment = totalClosing > 0 ? getTop(closingLeads, 'segment') : segment;
+        const closingChannel = totalClosing > 0 ? getTop(closingLeads, 'channel') : channel;
+
         try {
-            const prompt = `Sebagai konsultan properti syariah ahli, analisa Buyer Persona berdasarkan data demografi real-time berikut:
+            addLog("MGO AI Agent: Memulai alur kerja otomatisasi n8n style...", "start");
+            await new Promise(r => setTimeout(r, 1000));
+
+            addLog(`Membaca data demografi prospek dari pipeline (${totalLeads} Lead, ${totalClosing} Closing)...`, "info");
+            await new Promise(r => setTimeout(r, 800));
+
+            addLog("Memicu Node 1: Merumuskan Buyer Persona pasar via Gemini AI...", "gemini");
+            
+            const personaPrompt = `Sebagai konsultan properti syariah ahli, analisa Buyer Persona berdasarkan data demografi real-time berikut:
 
 Data Minat Umum (Pipeline):
 - Pekerjaan Terbanyak: ${job}
@@ -842,25 +966,79 @@ Berikan output dalam format JSON tunggal yang bisa di-parse, dengan struktur: {"
 2.  Untuk key "channelRecommendations" (array of objects), berikan 3 rekomendasi channel promosi paling efektif. Setiap object dalam array harus memiliki key:
     - "channel" (string): Nama channel (e.g., 'Facebook Ads', 'Instagram Reels', 'TikTok').
     - "reason" (string): 1 kalimat alasan singkat mengapa channel itu cocok.
-
-Contoh output:
-{"personaInsight": "1. Perbandingan Peminat vs Pembeli: ...\\n2. Psikologi: ...\\n3. Gaya Komunikasi: ...", "channelRecommendations": [{"channel": "Facebook Ads", "reason": "Menjangkau demografi spesifik berdasarkan pekerjaan dan minat."}, ...]}
 `;
-
-            const response = await ApiService.generateAIContent(prompt);
-            let cleanJson = (response.result || '').replace(/```json|```/g, '').trim();
-            const data = JSON.parse(cleanJson);
-
-            this.displayResult(data, true);
             
+            const personaResponse = await ApiService.generateAIContent(personaPrompt);
+            let cleanPersonaJson = (personaResponse.result || '').replace(/```json|```/g, '').trim();
+            const personaData = JSON.parse(cleanPersonaJson);
+            
+            addLog("Node 1 Sukses: Buyer Persona berhasil dirumuskan!", "success");
+            await new Promise(r => setTimeout(r, 800));
+
+            addLog(`Memicu Node 2: Menyusun Kalender Konten Otomatis (Durasi: ${duration} Hari, Freq: 1x/Hari)...`, "gemini");
+            
+            const calendarPrompt = `Anda adalah seorang Social Media Strategist ahli untuk agensi properti syariah.
+            
+**KONTEKS BUYER PERSONA:**
+---
+${personaData.personaInsight}
+---
+
+**TUGAS ANDA:**
+Buatlah **Rencana Kalender Konten (Content Calendar)** yang detail dan terstruktur.
+
+**PARAMETER:**
+- **Durasi:** ${duration} hari.
+- **Frekuensi:** 1 kali posting per hari.
+
+**INSTRUKSI OUTPUT:**
+Berikan output dalam format **JSON** yang bisa di-parse. Strukturnya harus berupa array of objects, di mana setiap object adalah satu jadwal post.
+Setiap object harus memiliki key berikut: "day" (Hari ke-), "time_slot" (Slot Waktu ke-), "content_pillar" (Pilih salah satu: Edukasi, Promosi, Interaksi, Testimoni), "topic_idea" (Ide topik konten yang spesifik dan menarik), "format" (Saran format: Reels, Carousel, Story, Single Image), dan "hook_suggestion" (Saran 1 kalimat untuk hook/caption pembuka).
+
+Pastikan jumlah object sesuai dengan (Durasi x Frekuensi). Jangan tambahkan teks atau penjelasan lain di luar format JSON.`;
+
+            const calendarResponse = await ApiService.generateAIContent(calendarPrompt);
+            let cleanCalendarJson = (calendarResponse.result || '').replace(/```json|```/g, '').trim();
+            
+            // Validate JSON
+            JSON.parse(cleanCalendarJson);
+            
+            addLog(`Node 2 Sukses: Kalender Konten ${duration} hari berhasil dibuat!`, "success");
+            await new Promise(r => setTimeout(r, 800));
+
+            addLog("Node 3: Menyimpan seluruh hasil AI Agent ke database...", "db");
+            
+            const formData = new FormData();
+            formData.append('developer_id', this.state.currentUser.developer_id);
+            formData.append('user_id', this.state.currentUser.id);
+            
+            const encodedInsight = btoa(unescape(encodeURIComponent(cleanPersonaJson)));
+            const encodedCalendar = btoa(unescape(encodeURIComponent(cleanCalendarJson)));
+            formData.append('ai_persona_insight', encodedInsight);
+            formData.append('ai_content_calendar', encodedCalendar);
+
+            const saveResponse = await fetch('api/save_developer_settings.php', { method: 'POST', body: formData });
+            if (!saveResponse.ok) throw new Error(`Server Error: ${saveResponse.status}`);
+            
+            // Update global state
+            if (!this.state.developerSettings) this.state.developerSettings = {};
+            this.state.developerSettings.ai_persona_insight = cleanPersonaJson;
+            this.state.developerSettings.ai_content_calendar = cleanCalendarJson;
+
+            addLog("Sinkronisasi database selesai!", "success");
+            await new Promise(r => setTimeout(r, 800));
+
+            addLog(`🎉 AI Agent Selesai! Kalender Konten ${duration} hari berhasil dirilis.`, "complete");
+            
+            // Render results
+            this.displayResult(personaData, false);
+
         } catch (error) {
-            personaContent.innerHTML = `<div class="text-red-500 font-bold">Analisa Gagal:</div><div class="text-xs mt-2">${error.message}</div>`;
-            resultGrid.classList.remove('hidden');
-            resultGrid.style.display = 'grid';
+            console.error(error);
+            addLog(`❌ Alur kerja AI Agent Gagal: ${error.message}`, "info");
         } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            if(window.lucide) window.lucide.createIcons();
+            if (btnManual) btnManual.disabled = false;
+            if (btnAuto) btnAuto.disabled = false;
         }
     }
 
@@ -872,7 +1050,6 @@ Contoh output:
 
         let insightText, channelData;
 
-        // Backward compatibility check
         if (typeof data === 'string') {
             try {
                 const parsedData = JSON.parse(data);
@@ -880,11 +1057,11 @@ Contoh output:
                 channelData = parsedData.channelRecommendations;
                 this.lastAIResult = parsedData;
             } catch (e) {
-                insightText = data; // Data lama (plain text)
+                insightText = data;
                 channelData = null;
                 this.lastAIResult = insightText;
             }
-        } else { // Data baru (sudah object)
+        } else {
             insightText = data.personaInsight;
             channelData = data.channelRecommendations;
             this.lastAIResult = data;
@@ -895,7 +1072,7 @@ Contoh output:
         if (channelData && Array.isArray(channelData)) {
             this.container.querySelector('#channel-result-card').style.display = 'block';
             channelContent.innerHTML = channelData.map(rec => `
-                <div class="bg-slate-700/50 p-4 rounded-xl border border-slate-600">
+                <div class="bg-slate-700/50 p-4 rounded-xl border border-slate-600 font-sans">
                     <p class="font-bold text-sm text-orange-400">${rec.channel}</p>
                     <p class="text-xs text-slate-300 italic mt-1">"${rec.reason}"</p>
                 </div>
@@ -906,55 +1083,8 @@ Contoh output:
 
         resultGrid.classList.remove('hidden');
         resultGrid.style.display = 'grid';
-
-        if (isNewResult) {
-            saveButtonContainer.innerHTML = `<button id="btn-save-persona" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-black text-[9px] uppercase shadow-lg transition-all active:scale-95 inline-flex items-center">
-                <i data-lucide="save" class="w-3 h-3 inline mr-1.5"></i> Simpan Hasil Analisa Ini
-            </button>`;
-            const saveButton = this.container.querySelector('#btn-save-persona');
-            saveButton.onclick = () => this.saveResult();
-        } else {
-            saveButtonContainer.innerHTML = '';
-        }
+        saveButtonContainer.innerHTML = ''; // Tombol simpan tidak diperlukan karena alur kerja n8n otomatis menyimpan
         if(window.lucide) window.lucide.createIcons();
-    }
-
-    async saveResult() { 
-        const saveButton = this.container.querySelector('#btn-save-persona');
-        if (!saveButton) return;
-        const originalContent = saveButton.innerHTML; // Simpan icon & text asli
-        saveButton.innerText = 'Menyimpan...';
-        saveButton.disabled = true;
-
-        const formData = new FormData();
-        formData.append('developer_id', this.state.currentUser.developer_id);
-        formData.append('user_id', this.state.currentUser.id); // FIX: Tambahkan User ID agar lolos validasi server
-        
-        // Encode AI text to Base64 to bypass WAF
-        // Simpan sebagai string JSON
-        const resultString = typeof this.lastAIResult === 'string' ? this.lastAIResult : JSON.stringify(this.lastAIResult);
-        const encodedInsight = btoa(unescape(encodeURIComponent(resultString)));
-        formData.append('ai_persona_insight', encodedInsight);
-
-        try {
-            // Gunakan path relative 'api/' yang lebih aman
-            const response = await fetch('api/save_developer_settings.php', { method: 'POST', body: formData });
-            
-            if (!response.ok) throw new Error(`Server Error: ${response.status}`);
-            const result = await response.json();
-            
-            alert('Hasil analisa berhasil disimpan!');
-            saveButton.parentElement.innerHTML = ''; // Hapus container tombol
-            
-            // Update state global agar Content Calendar langsung bisa baca
-            if (!this.state.developerSettings) this.state.developerSettings = {};
-            this.state.developerSettings.ai_persona_insight = this.lastAIResult;
-
-        } catch (error) {
-            alert('Gagal menyimpan hasil: ' + error.message);
-            saveButton.innerHTML = originalContent; // Kembalikan icon & text
-            saveButton.disabled = false;
-        }
     }
 }
 
