@@ -32,9 +32,9 @@ export class LeadAnalyzerComponent {
                         <i data-lucide="sparkles" class="w-6 h-6 text-orange-400 font-black animate-pulse"></i>
                     </div>
                     <div>
-                        <h4 class="font-black text-white text-xs uppercase tracking-widest leading-none mb-1">Edukasi Agen & CS - Mengapa WA Wajib?</h4>
+                        <h4 class="font-black text-white text-xs uppercase tracking-widest leading-none mb-1">Edukasi Agen & CS - Analisa Tajam AI</h4>
                         <p class="text-[10px] md:text-xs text-teal-100 leading-relaxed font-medium">
-                            "Menyembunyikan nomor WhatsApp akan membuat Anda rugi! AI membutuhkan nomor WhatsApp prospek agar dapat mensinkronkan data profil dari pipeline, membedah gaya hidup dan kemampuan finansial mereka secara 100% presisi. Jika nomor WhatsApp kosong, Anda hanya bisa menikmati analisa percakapan cepat saja."
+                            "Dapatkan analisa lebih tajam dengan input nomor whatsapp lead. AI membutuhkan nomor WhatsApp prospek agar dapat mensinkronkan data profil dari pipeline, membedah gaya hidup dan kemampuan finansial mereka secara 100% presisi. Jika nomor WhatsApp kosong, Anda hanya bisa menikmati analisa percakapan cepat saja."
                         </p>
                     </div>
                 </div>
